@@ -3,7 +3,7 @@ export interface Word {
   english: string;
   chinese: string;
   pronunciation: string;
-  category: 'alphabet' | 'number' | 'color' | 'animal' | 'fruit' | 'family';
+  category: 'alphabet' | 'number' | 'color' | 'animal' | 'fruit' | 'family' | 'body' | 'food' | 'toy';
   image: string;
   audioUrl?: string;
 }
@@ -13,7 +13,7 @@ export interface GameProgress {
   completed: boolean;
   score: number;
   attempts: number;
-  lastPlayed: Date;
+  lastPlayed: string; // 改为字符串，便于序列化
 }
 
 export interface UserProgress {
@@ -35,4 +35,4 @@ export interface Game {
   category: string;
 }
 
-export type GameType = 'matching' | 'listening' | 'spelling' | 'puzzle';
+export type GameType = 'matching' | 'listening' | 'spelling' | 'puzzle' | 'menu';

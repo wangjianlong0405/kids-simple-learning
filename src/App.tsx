@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from './components/Header';
 import MainMenu from './components/MainMenu';
@@ -7,21 +7,32 @@ import WordCard from './components/WordCard';
 import GameInterface from './components/GameInterface';
 import ProgressPanel from './components/ProgressPanel';
 import SettingsPanel from './components/SettingsPanel';
-import LearningStats from './components/LearningStats';
 import WordList from './components/WordList';
 import GameMenu from './components/GameMenu';
 import NotificationSystem, { useNotifications } from './components/NotificationSystem';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import HelpModal from './components/HelpModal';
-import AchievementSystem from './components/AchievementSystem';
-import LearningPlan from './components/LearningPlan';
-import ParentDashboard from './components/ParentDashboard';
+import AudioCompatibilityDemo from './components/AudioCompatibilityDemo';
+import AudioSystemDashboard from './components/AudioSystemDashboard';
 import { useStore } from './store/useStore';
 
 function App() {
   const { currentGame, currentWord, isGameActive, currentCategory } = useStore();
   const { notifications, removeNotification } = useNotifications();
   const [showHelp, setShowHelp] = useState(false);
+  const [showAudioDemo, setShowAudioDemo] = useState(false);
+  const [showAudioDashboard, setShowAudioDashboard] = useState(false);
+
+  useEffect(() => {
+    const handleShowAudioDemo = () => setShowAudioDemo(true);
+    const handleShowAudioDashboard = () => setShowAudioDashboard(true);
+    window.addEventListener('showAudioDemo', handleShowAudioDemo);
+    window.addEventListener('showAudioDashboard', handleShowAudioDashboard);
+    return () => {
+      window.removeEventListener('showAudioDemo', handleShowAudioDemo);
+      window.removeEventListener('showAudioDashboard', handleShowAudioDashboard);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
@@ -82,8 +93,45 @@ function App() {
         {/* 键盘快捷键 */}
         <KeyboardShortcuts onShowHelp={() => setShowHelp(true)} />
         
+        
         {/* 帮助模态框 */}
         <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+        
+        {/* 音频兼容性演示 */}
+        {showAudioDemo && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">🎵 发音兼容性演示</h2>
+                <button
+                  onClick={() => setShowAudioDemo(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <AudioCompatibilityDemo />
+            </div>
+          </div>
+        )}
+        
+        {/* 音频系统仪表板 */}
+        {showAudioDashboard && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">🎵 音频系统仪表板</h2>
+                <button
+                  onClick={() => setShowAudioDashboard(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <AudioSystemDashboard />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

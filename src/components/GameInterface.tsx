@@ -8,7 +8,7 @@ import SpellingGame from './games/SpellingGame';
 import PuzzleGame from './games/PuzzleGame';
 
 const GameInterface: React.FC = () => {
-  const { currentGame, endGame, gameScore, gameAttempts, startGame } = useStore();
+  const { currentGame, endGame, gameScore, gameAttempts, startGame, updateGameProgress, currentWord } = useStore();
   const [gameStatus, setGameStatus] = useState<'playing' | 'completed' | 'failed'>('playing');
   const [showResult, setShowResult] = useState(false);
 
@@ -19,6 +19,11 @@ const GameInterface: React.FC = () => {
   const handleGameComplete = (score: number, success: boolean) => {
     setGameStatus(success ? 'completed' : 'failed');
     setShowResult(true);
+    
+    // 更新学习进度
+    if (currentWord) {
+      updateGameProgress(currentWord.id, success, score);
+    }
   };
 
   const handleRestart = () => {

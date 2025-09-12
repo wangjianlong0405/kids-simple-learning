@@ -27,7 +27,7 @@ const LearningPlan: React.FC = () => {
   const generateDailyGoals = () => {
     const today = new Date().toDateString();
     const todayProgress = gameProgress.filter(p => 
-      new Date(p.date || Date.now()).toDateString() === today
+      new Date(p.lastPlayed || Date.now()).toDateString() === today
     );
 
     const goals: DailyGoal[] = [

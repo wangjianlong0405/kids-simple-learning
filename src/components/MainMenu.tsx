@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, BookOpen, Gamepad2, Award, Settings, BarChart3 } from 'lucide-react';
+import { Play, BookOpen, Gamepad2, Settings, BarChart3 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import LearningStats from './LearningStats';
+import { welcomeEffects } from '../utils/welcomeEffects';
 
 const MainMenu: React.FC = () => {
   const { setCurrentGame, setCurrentCategory, setShowSettings } = useStore();
   const [showStats, setShowStats] = useState(false);
+
+  useEffect(() => {
+    // 播放欢迎音效
+    welcomeEffects.playWelcomeSound();
+  }, []);
 
   const menuItems = [
     {
@@ -102,7 +108,10 @@ const MainMenu: React.FC = () => {
             transition={{ delay: 0.1 * index, duration: 0.5 }}
             whileHover={{ scale: 1.05, rotate: 2 }}
             whileTap={{ scale: 0.95 }}
-            onClick={item.action}
+            onClick={() => {
+              welcomeEffects.playClickSound();
+              item.action();
+            }}
             data-testid={`${item.id}-button`}
             className={`
               bg-gradient-to-br ${item.color} 

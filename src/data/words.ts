@@ -88,6 +88,30 @@ export const wordsData: Word[] = [
   { id: 'aunt', english: 'Aunt', chinese: '阿姨/姑姑', pronunciation: '/ænt/', category: 'family', image: '👩' },
   { id: 'uncle', english: 'Uncle', chinese: '叔叔/舅舅', pronunciation: '/ˈʌŋkəl/', category: 'family', image: '👨' },
   { id: 'cousin', english: 'Cousin', chinese: '表兄弟姐妹', pronunciation: '/ˈkʌzən/', category: 'family', image: '👫' },
+  
+  // 身体部位
+  { id: 'head', english: 'Head', chinese: '头', pronunciation: '/hed/', category: 'body', image: '👤' },
+  { id: 'eye', english: 'Eye', chinese: '眼睛', pronunciation: '/aɪ/', category: 'body', image: '👁️' },
+  { id: 'nose', english: 'Nose', chinese: '鼻子', pronunciation: '/noʊz/', category: 'body', image: '👃' },
+  { id: 'mouth', english: 'Mouth', chinese: '嘴巴', pronunciation: '/maʊθ/', category: 'body', image: '👄' },
+  { id: 'hand', english: 'Hand', chinese: '手', pronunciation: '/hænd/', category: 'body', image: '✋' },
+  { id: 'foot', english: 'Foot', chinese: '脚', pronunciation: '/fʊt/', category: 'body', image: '🦶' },
+  
+  // 食物
+  { id: 'bread', english: 'Bread', chinese: '面包', pronunciation: '/bred/', category: 'food', image: '🍞' },
+  { id: 'milk', english: 'Milk', chinese: '牛奶', pronunciation: '/mɪlk/', category: 'food', image: '🥛' },
+  { id: 'egg', english: 'Egg', chinese: '鸡蛋', pronunciation: '/eɡ/', category: 'food', image: '🥚' },
+  { id: 'cake', english: 'Cake', chinese: '蛋糕', pronunciation: '/keɪk/', category: 'food', image: '🍰' },
+  { id: 'cookie', english: 'Cookie', chinese: '饼干', pronunciation: '/ˈkʊki/', category: 'food', image: '🍪' },
+  { id: 'pizza', english: 'Pizza', chinese: '披萨', pronunciation: '/ˈpiːtsə/', category: 'food', image: '🍕' },
+  
+  // 玩具
+  { id: 'ball', english: 'Ball', chinese: '球', pronunciation: '/bɔːl/', category: 'toy', image: '⚽' },
+  { id: 'doll', english: 'Doll', chinese: '娃娃', pronunciation: '/dɑːl/', category: 'toy', image: '🧸' },
+  { id: 'car', english: 'Car', chinese: '小汽车', pronunciation: '/kɑːr/', category: 'toy', image: '🚗' },
+  { id: 'train', english: 'Train', chinese: '火车', pronunciation: '/treɪn/', category: 'toy', image: '🚂' },
+  { id: 'robot', english: 'Robot', chinese: '机器人', pronunciation: '/ˈroʊbɑːt/', category: 'toy', image: '🤖' },
+  { id: 'teddy', english: 'Teddy', chinese: '泰迪熊', pronunciation: '/ˈtedi/', category: 'toy', image: '🧸' },
 ];
 
 export const categories = [
@@ -97,6 +121,9 @@ export const categories = [
   { id: 'animal', name: '动物', icon: '🐾', color: 'bg-yellow-500' },
   { id: 'fruit', name: '水果', icon: '🍎', color: 'bg-orange-500' },
   { id: 'family', name: '家庭', icon: '👨‍👩‍👧‍👦', color: 'bg-purple-500' },
+  { id: 'body', name: '身体', icon: '👤', color: 'bg-pink-500' },
+  { id: 'food', name: '食物', icon: '🍽️', color: 'bg-indigo-500' },
+  { id: 'toy', name: '玩具', icon: '🧸', color: 'bg-teal-500' },
 ];
 
 export const games = [

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Word, UserProgress, GameProgress, GameType } from '../types';
 
 interface AppState {
@@ -47,7 +48,9 @@ const initialUserProgress: UserProgress = {
   stars: 0,
 };
 
-export const useStore = create<AppState>()((set, get) => ({
+export const useStore = create<AppState>()(
+  persist(
+    (set, get) => ({
       // 初始状态
       userProgress: initialUserProgress,
       gameProgress: [],
@@ -84,7 +87,7 @@ export const useStore = create<AppState>()((set, get) => ({
           completed,
           score: Math.max(existingProgress?.score || 0, score),
           attempts: (existingProgress?.attempts || 0) + 1,
-          lastPlayed: new Date(),
+          lastPlayed: new Date().toISOString(),
         };
         
         const updatedProgress = existingProgress
@@ -158,5 +161,13 @@ export const useStore = create<AppState>()((set, get) => ({
         isPlaying: false,
         currentAudio: null,
       }),
-    })
+    }),
+    {
+      name: 'kids-english-learning-storage',
+      partialize: (state) => ({
+        userProgress: state.userProgress,
+        gameProgress: state.gameProgress,
+      }),
+    }
+  )
 );

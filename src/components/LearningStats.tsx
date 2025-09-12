@@ -10,7 +10,7 @@ const LearningStats: React.FC = () => {
   const { userProgress, gameProgress } = useStore();
 
   // 计算统计数据
-  const totalWords = 76; // 更新为实际的单词总数
+  const totalWords = 55; // 更新为实际的单词总数
   const completedWords = gameProgress.filter(p => p.completed).length;
   const completionRate = Math.round((completedWords / totalWords) * 100);
   
@@ -24,10 +24,13 @@ const LearningStats: React.FC = () => {
   const categoryStats = {
     alphabet: gameProgress.filter(p => p.wordId.match(/^[a-z]$/)).length,
     number: gameProgress.filter(p => p.wordId.match(/^[1-9]|10$/)).length,
-    color: gameProgress.filter(p => ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white'].includes(p.wordId)).length,
+    color: gameProgress.filter(p => ['red', 'blue', 'green', 'yellow', 'purple', 'orange-color', 'pink', 'brown', 'black', 'white'].includes(p.wordId)).length,
     animal: gameProgress.filter(p => ['cat', 'dog', 'bird', 'fish', 'rabbit', 'elephant', 'lion', 'tiger', 'bear', 'monkey'].includes(p.wordId)).length,
-    fruit: gameProgress.filter(p => ['apple', 'banana', 'orange', 'grape', 'strawberry', 'watermelon', 'pineapple', 'peach', 'pear', 'cherry'].includes(p.wordId)).length,
+    fruit: gameProgress.filter(p => ['apple', 'banana', 'orange-fruit', 'grape', 'strawberry', 'watermelon', 'pineapple', 'peach', 'pear', 'cherry'].includes(p.wordId)).length,
     family: gameProgress.filter(p => ['mom', 'dad', 'sister', 'brother', 'baby', 'grandma', 'grandpa', 'aunt', 'uncle', 'cousin'].includes(p.wordId)).length,
+    body: gameProgress.filter(p => ['head', 'eye', 'nose', 'mouth', 'hand', 'foot'].includes(p.wordId)).length,
+    food: gameProgress.filter(p => ['bread', 'milk', 'egg', 'cake', 'cookie', 'pizza'].includes(p.wordId)).length,
+    toy: gameProgress.filter(p => ['ball', 'doll', 'car', 'train', 'robot', 'teddy'].includes(p.wordId)).length,
   };
 
   // 最近7天学习记录
@@ -122,9 +125,23 @@ const LearningStats: React.FC = () => {
               color: '颜色',
               animal: '动物',
               fruit: '水果',
-              family: '家庭'
+              family: '家庭',
+              body: '身体',
+              food: '食物',
+              toy: '玩具'
             };
-            const maxCount = 5; // 每个类别最多5个单词
+            const maxCounts = {
+              alphabet: 26,
+              number: 10,
+              color: 10,
+              animal: 10,
+              fruit: 10,
+              family: 10,
+              body: 6,
+              food: 6,
+              toy: 6
+            };
+            const maxCount = maxCounts[category as keyof typeof maxCounts] || 5;
             const percentage = Math.round((count / maxCount) * 100);
             
             return (

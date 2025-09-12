@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam activityBackgroundColor #ffffff
+skinparam activityBorderColor #007bff
+skinparam activityFontColor #000000
+skinparam activityDiamondBackgroundColor #ffffff
+skinparam activityDiamondBorderColor #007bff
+
+title 导航流程修复方案
+
+start
+
+:用户在主菜单;
+:点击"游戏乐园"按钮;
+:设置 currentGame = 'menu';
+:显示 GameMenu 组件;
+
+:用户选择具体游戏;
+note right: 配对游戏、听音识词、拼写游戏、拼图游戏
+
+:设置 currentGame = 游戏类型;
+note right: 'matching', 'listening', 'spelling', 'puzzle'
+
+:显示 GameInterface 组件;
+:游戏进行中;
+
+if (用户点击返回?) then (是)
+  :调用 endGame() 函数;
+  :设置 currentGame = 'menu';
+  :设置 isGameActive = false;
+  :返回到 GameMenu 组件;
+  -> 用户选择具体游戏;
+else (否)
+  :继续游戏;
+endif
+
+if (用户点击返回到主菜单?) then (是)
+  :设置 currentGame = null;
+  :设置 currentCategory = '';
+  :返回到 MainMenu 组件;
+  -> 用户在主菜单;
+else (否)
+  :继续在游戏菜单;
+endif
+
+:结束;
+
+@enduml

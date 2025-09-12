@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam activityBackgroundColor #ffffff
+skinparam activityBorderColor #007bff
+skinparam activityFontColor #000000
+skinparam activityDiamondBackgroundColor #ffffff
+skinparam activityDiamondBorderColor #007bff
+
+title 游戏流程修复方案
+
+start
+
+:用户进入主菜单;
+:点击"游戏"按钮;
+:显示游戏选择界面;
+:用户选择具体游戏;
+note right: 配对游戏、听音识词、拼写游戏、拼图游戏
+
+:设置currentGame状态;
+note right: 例如: 'matching', 'listening', 'spelling', 'puzzle'
+
+if (currentGame !== 'menu'?) then (是)
+  :显示GameInterface组件;
+  :渲染对应的游戏组件;
+  note right: MatchingGame, ListeningGame, SpellingGame, PuzzleGame
+else (否)
+  :显示游戏选择菜单;
+endif
+
+:用户开始游戏;
+:游戏进行中;
+:游戏完成;
+:显示结果;
+:用户选择操作;
+
+if (再玩一次?) then (是)
+  :重新开始游戏;
+  -> 游戏进行中;
+else (否)
+  if (返回菜单?) then (是)
+    :返回主菜单;
+    -> 用户进入主菜单;
+  else (否)
+    :结束;
+  endif
+endif
+
+@enduml

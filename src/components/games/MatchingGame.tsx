@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../../store/useStore';
 import { wordsData } from '../../data/words';
 import { AudioEffects } from '../../utils/audioEffects';
+import { welcomeEffects } from '../../utils/welcomeEffects';
 
 interface MatchingGameProps {
   onComplete: (score: number, success: boolean) => void;
@@ -72,13 +73,13 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
         });
         setCards(newCards);
         setScore(prev => prev + 10);
-        AudioEffects.playSuccess(); // 播放成功音效
+        welcomeEffects.playSuccessSound(); // 播放成功音效
         
         // 检查游戏是否完成
         const allMatched = newCards.every(card => card.matched);
         if (allMatched) {
           setGameComplete(true);
-          AudioEffects.playComplete(); // 播放完成音效
+          welcomeEffects.playCompleteSound(); // 播放完成音效
           onComplete(score + 10, true);
         }
       } else {
@@ -90,7 +91,7 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
           return card;
         });
         setCards(newCards);
-        AudioEffects.playError(); // 播放错误音效
+        welcomeEffects.playErrorSound(); // 播放错误音效
       }
       setSelectedCards([]);
     }, 1000);

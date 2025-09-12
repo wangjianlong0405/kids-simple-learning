@@ -8,7 +8,7 @@ const ProgressPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const completedWords = gameProgress.filter(p => p.completed).length;
-  const totalWords = 25; // 总词汇数
+  const totalWords = 55; // 总词汇数 (26字母 + 10数字 + 10颜色 + 10动物 + 10水果 + 10家庭 + 6身体 + 6食物 + 6玩具)
   const progressPercentage = Math.round((completedWords / totalWords) * 100);
 
   const recentProgress = gameProgress

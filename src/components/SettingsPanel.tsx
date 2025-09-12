@@ -151,7 +151,7 @@ const SettingsPanel: React.FC = () => {
                       </button>
                     ) : (
                       <select
-                        value={item.value}
+                        value={String(item.value)}
                         onChange={(e) => handleSettingChange(item.key, e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg font-kids focus:border-blue-500 focus:outline-none"
                       >
