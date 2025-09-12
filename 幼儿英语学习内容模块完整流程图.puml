@@ -1,0 +1,82 @@
+@startuml 幼儿英语学习内容模块完整流程图
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+
+package "已实现模块" as implemented {
+  component [基础词汇学习] as vocab
+  component [游戏化学习] as games
+  component [学习管理] as management
+  component [语音学习模块] as phonics
+  component [句型结构学习] as sentences
+}
+
+package "待实现模块" as pending {
+  component [情境化学习] as scenarios
+  component [文化认知] as culture
+  component [高级认知技能] as cognitive
+}
+
+package "具体功能" as features {
+  component [音标学习] as phonetics
+  component [发音练习] as pronunciation
+  component [基础句型] as basic_sentences
+  component [对话练习] as conversation
+  component [场景模拟] as scenario_sim
+  component [角色扮演] as role_play
+  component [故事学习] as stories
+  component [文化介绍] as cultural_intro
+  component [节日学习] as festivals
+  component [逻辑思维] as logic
+  component [创造力培养] as creativity
+}
+
+vocab --> phonetics : 已实现
+vocab --> pronunciation : 已实现
+games --> basic_sentences : 已实现
+games --> conversation : 已实现
+management --> scenario_sim : 待实现
+management --> role_play : 待实现
+management --> stories : 待实现
+
+phonics --> phonetics
+phonics --> pronunciation
+sentences --> basic_sentences
+sentences --> conversation
+scenarios --> scenario_sim
+scenarios --> role_play
+scenarios --> stories
+culture --> cultural_intro
+culture --> festivals
+cognitive --> logic
+cognitive --> creativity
+
+note right of implemented
+  已实现的核心模块：
+  ✅ 基础词汇学习 (115个单词)
+  ✅ 游戏化学习 (4种游戏)
+  ✅ 学习管理系统
+  ✅ 语音学习模块 (20个音标)
+  ✅ 句型结构学习 (12种句型)
+end note
+
+note right of pending
+  待实现的重要模块：
+  🔄 情境化学习 - 提高实际应用
+  🔄 文化认知 - 培养跨文化理解
+  🔄 高级认知技能 - 促进思维发展
+end note
+
+note right of features
+  具体功能实现：
+  🎵 音标学习 - 元音、辅音、双元音
+  🗣️ 发音练习 - 录音对比、发音评分
+  📝 句型练习 - 基础句型、疑问句、描述句
+  💬 对话练习 - 日常对话、角色扮演
+  🎭 场景模拟 - 生活场景、互动对话
+  🌍 文化学习 - 节日、传统、文化对比
+  🧠 思维训练 - 逻辑推理、创造力培养
+end note
+
+@enduml

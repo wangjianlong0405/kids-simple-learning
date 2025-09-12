@@ -1,0 +1,101 @@
+@startuml 测试修复流程图
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam activityBackgroundColor #ffffff
+skinparam activityBorderColor #007bff
+skinparam activityFontColor #000000
+skinparam activityDiamondBackgroundColor #ffffff
+skinparam activityDiamondBorderColor #007bff
+
+title 幼儿英语学习系统测试修复流程图
+
+start
+
+:分析测试失败原因;
+note right
+  发现7个测试失败：
+  1. 词汇数据完整性
+  2. 音标数据完整性
+  3. 句型数据完整性
+  4. 场景数据完整性
+  5. 文化数据完整性
+  6. 认知训练数据完整性
+  7. 主菜单组件导入
+end note
+
+:修复词汇数据完整性;
+note right
+  为所有词汇数据添加：
+  - audioUrl字段
+  - phoneticSymbol字段
+  - sentenceExamples字段
+  - culturalContext字段
+end note
+
+:修复音标数据完整性;
+note right
+  音标数据已有audioUrl字段
+  检查确认完整性
+end note
+
+:修复句型数据完整性;
+note right
+  为所有句型数据添加：
+  - audioUrl字段
+  更新SentencePattern接口
+end note
+
+:修复场景数据完整性;
+note right
+  为所有场景数据添加：
+  - audioUrl字段
+  更新LearningScenario接口
+end note
+
+:修复文化数据完整性;
+note right
+  为所有文化数据添加：
+  - audioUrl字段
+  更新CulturalContent接口
+end note
+
+:修复认知训练数据完整性;
+note right
+  为所有认知训练数据添加：
+  - audioUrl字段
+  更新LogicPuzzle、CreativeActivity、
+  ProblemChallenge接口
+end note
+
+:修复主菜单组件导入问题;
+note right
+  检查MainMenu组件导入
+  修复ProjectTest组件的require问题
+  修复LearningAnalytics类型错误
+end note
+
+:更新类型定义;
+note right
+  在types/index.ts中添加：
+  - LogicPuzzle接口
+  - CreativeActivity接口
+  - ProblemChallenge接口
+  更新现有接口添加audioUrl字段
+end note
+
+:验证修复结果;
+note right
+  运行npm run build
+  检查TypeScript编译错误
+  确认所有测试通过
+end note
+
+:生成修复报告;
+note right
+  创建测试修复流程图
+  总结修复内容和方法
+end note
+
+stop
+
+@enduml

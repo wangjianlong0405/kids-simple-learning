@@ -1,0 +1,80 @@
+@startuml 幼儿英语学习内容模块分析
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+
+package "现有模块" as existing {
+  component [基础词汇学习] as vocab
+  component [游戏化学习] as games
+  component [学习管理] as management
+}
+
+package "缺失的重要模块" as missing {
+  component [语音学习模块] as phonics
+  component [句型结构学习] as sentences
+  component [情境化学习] as scenarios
+  component [文化认知] as culture
+  component [高级认知技能] as cognitive
+}
+
+package "建议补充内容" as suggested {
+  component [音标学习] as phonetics
+  component [发音练习] as pronunciation
+  component [基础句型] as basic_sentences
+  component [日常对话] as daily_conversation
+  component [生活场景] as life_scenarios
+  component [角色扮演] as role_play
+  component [故事学习] as stories
+  component [文化介绍] as cultural_intro
+  component [节日学习] as festivals
+  component [逻辑思维] as logic
+  component [创造力培养] as creativity
+}
+
+vocab --> phonics : 需要补充
+vocab --> pronunciation : 需要补充
+games --> basic_sentences : 需要补充
+games --> daily_conversation : 需要补充
+management --> life_scenarios : 需要补充
+management --> role_play : 需要补充
+
+phonics --> phonetics
+phonics --> pronunciation
+sentences --> basic_sentences
+sentences --> daily_conversation
+scenarios --> life_scenarios
+scenarios --> role_play
+scenarios --> stories
+culture --> cultural_intro
+culture --> festivals
+cognitive --> logic
+cognitive --> creativity
+
+note right of vocab
+  现有词汇分类：
+  - 字母 (A-Z)
+  - 数字 (1-10)
+  - 颜色、动物、水果等
+  但缺少语音学习
+end note
+
+note right of games
+  现有游戏类型：
+  - 配对游戏
+  - 听音识词
+  - 拼写游戏
+  - 拼图游戏
+  但缺少句型练习
+end note
+
+note right of missing
+  关键缺失模块：
+  1. 语音学习 - 影响发音准确性
+  2. 句型结构 - 影响语言表达
+  3. 情境化学习 - 影响实际应用
+  4. 文化认知 - 影响语言理解
+  5. 高级认知 - 影响思维能力
+end note
+
+@enduml

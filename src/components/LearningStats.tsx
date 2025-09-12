@@ -10,7 +10,7 @@ const LearningStats: React.FC = () => {
   const { userProgress, gameProgress } = useStore();
 
   // 计算统计数据
-  const totalWords = 55; // 更新为实际的单词总数
+  const totalWords = 238; // 更新为实际的单词总数（包含短语）
   const completedWords = gameProgress.filter(p => p.completed).length;
   const completionRate = Math.round((completedWords / totalWords) * 100);
   

@@ -1,0 +1,108 @@
+@startuml 应用流程修复
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam activityBackgroundColor #e3f2fd
+skinparam activityBorderColor #1976d2
+skinparam activityFontColor #000000
+skinparam activityDiamondBackgroundColor #fff3e0
+skinparam activityDiamondBorderColor #f57c00
+
+title 幼儿英语学习应用流程修复
+
+start
+
+:应用启动;
+note right: 初始状态 currentCategory = ''
+
+if (currentCategory == '' && !currentWord && !currentGame && !isGameActive) then (是)
+  :显示主菜单页面;
+  note right: MainMenu 组件
+  :用户选择功能;
+  
+  if (选择词汇学习) then (是)
+    :设置 currentCategory = 'menu';
+    :显示分类菜单;
+    note right: CategoryMenu 组件
+  elseif (选择语音学习) then (是)
+    :显示语音学习页面;
+    note right: PhonicsLearning 组件
+  elseif (选择句型练习) then (是)
+    :显示句型练习页面;
+    note right: SentenceBuilder 组件
+  elseif (选择游戏乐园) then (是)
+    :设置 currentGame = 'menu';
+    :显示游戏菜单;
+    note right: GameMenu 组件
+  elseif (选择情境学习) then (是)
+    :显示情境学习页面;
+    note right: ScenarioSimulator 组件
+  elseif (选择文化学习) then (是)
+    :显示文化学习页面;
+    note right: CulturalLearning 组件
+  elseif (选择思维训练) then (是)
+    :显示思维训练页面;
+    note right: CognitiveTraining 组件
+  elseif (选择学习统计) then (是)
+    :显示学习统计页面;
+    note right: LearningStats 组件
+  elseif (选择设置) then (是)
+    :显示设置面板;
+    note right: SettingsPanel 组件
+  else (其他)
+    :显示对应功能页面;
+  endif
+
+elseif (currentCategory == 'menu' && !currentWord && !currentGame && !isGameActive) then (是)
+  :显示分类菜单;
+  note right: CategoryMenu 组件
+  :用户选择词汇分类;
+  :设置 currentCategory = 选择的分类;
+  :显示词汇列表;
+  note right: WordList 组件
+
+elseif (currentCategory != '' && currentCategory != 'menu' && !currentWord && !currentGame && !isGameActive) then (是)
+  :显示词汇列表;
+  note right: WordList 组件
+  :用户选择单词;
+  :设置 currentWord = 选择的单词;
+  :显示单词卡片;
+  note right: WordCard 组件
+
+elseif (currentWord && !isGameActive) then (是)
+  :显示单词卡片;
+  note right: WordCard 组件
+  :用户学习单词;
+
+elseif (currentGame && currentGame != 'menu') then (是)
+  :显示游戏界面;
+  note right: GameInterface 组件
+  :用户玩游戏;
+
+elseif (currentGame == 'menu' && !currentWord && !currentCategory && !isGameActive) then (是)
+  :显示游戏菜单;
+  note right: GameMenu 组件
+  :用户选择游戏;
+  :设置 currentGame = 选择的游戏;
+  :显示游戏界面;
+  note right: GameInterface 组件
+
+else (其他状态)
+  :显示对应页面;
+  note right: 根据状态显示相应组件
+endif
+
+:用户操作;
+note right: 点击返回按钮或完成当前任务
+
+if (返回主菜单) then (是)
+  :重置状态;
+  note right: currentCategory = '', currentWord = null, currentGame = null
+  :显示主菜单;
+  note right: MainMenu 组件
+else (继续当前功能)
+  :继续当前页面;
+endif
+
+stop
+
+@enduml

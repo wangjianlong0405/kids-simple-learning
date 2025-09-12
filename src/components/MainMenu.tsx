@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, BookOpen, Gamepad2, Settings, BarChart3 } from 'lucide-react';
+import { Play, BookOpen, Gamepad2, Settings, BarChart3, Volume2, MessageSquare, Globe, Brain, Users, Monitor, TrendingUp, TestTube } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import LearningStats from './LearningStats';
+import PhonicsLearning from './phonics/PhonicsLearning';
+import SentenceBuilder from './sentences/SentenceBuilder';
+import ScenarioSimulator from './scenarios/ScenarioSimulator';
+import CulturalLearning from './culture/CulturalLearning';
+import CognitiveTraining from './cognitive/CognitiveTraining';
+import DemoMode from './DemoMode';
+import LearningAnalytics from './LearningAnalytics';
+import ProjectTest from './ProjectTest';
 import { welcomeEffects } from '../utils/welcomeEffects';
 
 const MainMenu: React.FC = () => {
   const { setCurrentGame, setCurrentCategory, setShowSettings } = useStore();
   const [showStats, setShowStats] = useState(false);
+  const [showPhonics, setShowPhonics] = useState(false);
+  const [showSentences, setShowSentences] = useState(false);
+  const [showScenarios, setShowScenarios] = useState(false);
+  const [showCulture, setShowCulture] = useState(false);
+  const [showCognitive, setShowCognitive] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showTest, setShowTest] = useState(false);
 
   useEffect(() => {
     // 播放欢迎音效
@@ -17,34 +33,98 @@ const MainMenu: React.FC = () => {
   const menuItems = [
     {
       id: 'learn',
-      title: '开始学习',
+      title: '词汇学习',
       subtitle: 'Learn New Words',
       icon: <BookOpen className="w-8 h-8" />,
       color: 'from-blue-500 to-cyan-500',
       action: () => setCurrentCategory('menu')
     },
     {
+      id: 'phonics',
+      title: '语音学习',
+      subtitle: 'Phonics Learning',
+      icon: <Volume2 className="w-8 h-8" />,
+      color: 'from-red-500 to-pink-500',
+      action: () => setShowPhonics(true)
+    },
+    {
+      id: 'sentences',
+      title: '句型练习',
+      subtitle: 'Sentence Practice',
+      icon: <MessageSquare className="w-8 h-8" />,
+      color: 'from-green-500 to-emerald-500',
+      action: () => setShowSentences(true)
+    },
+    {
       id: 'games',
       title: '游戏乐园',
       subtitle: 'Play Games',
       icon: <Gamepad2 className="w-8 h-8" />,
-      color: 'from-green-500 to-emerald-500',
+      color: 'from-purple-500 to-indigo-500',
       action: () => setCurrentGame('menu')
+    },
+    {
+      id: 'scenarios',
+      title: '情境学习',
+      subtitle: 'Scenario Learning',
+      icon: <Users className="w-8 h-8" />,
+      color: 'from-indigo-500 to-purple-500',
+      action: () => setShowScenarios(true)
+    },
+    {
+      id: 'culture',
+      title: '文化学习',
+      subtitle: 'Cultural Learning',
+      icon: <Globe className="w-8 h-8" />,
+      color: 'from-yellow-500 to-orange-500',
+      action: () => setShowCulture(true)
+    },
+    {
+      id: 'cognitive',
+      title: '思维训练',
+      subtitle: 'Cognitive Training',
+      icon: <Brain className="w-8 h-8" />,
+      color: 'from-teal-500 to-cyan-500',
+      action: () => setShowCognitive(true)
+    },
+    {
+      id: 'demo',
+      title: '项目演示',
+      subtitle: 'Project Demo',
+      icon: <Monitor className="w-8 h-8" />,
+      color: 'from-cyan-500 to-blue-500',
+      action: () => setShowDemo(true)
+    },
+    {
+      id: 'analytics',
+      title: '学习分析',
+      subtitle: 'Learning Analytics',
+      icon: <TrendingUp className="w-8 h-8" />,
+      color: 'from-pink-500 to-rose-500',
+      action: () => setShowAnalytics(true)
     },
     {
       id: 'progress',
       title: '学习统计',
       subtitle: 'Learning Stats',
       icon: <BarChart3 className="w-8 h-8" />,
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-indigo-500 to-purple-500',
       action: () => setShowStats(true)
+    },
+    {
+      id: 'test',
+      title: '项目测试',
+      subtitle: 'Project Test',
+      icon: <TestTube className="w-8 h-8" />,
+      color: 'from-emerald-500 to-teal-500',
+      action: () => setShowTest(true)
     },
     {
       id: 'settings',
       title: '设置',
       subtitle: 'Settings',
       icon: <Settings className="w-8 h-8" />,
-      color: 'from-orange-500 to-red-500',
+      color: 'from-gray-500 to-gray-600',
       action: () => setShowSettings(true)
     }
   ];
@@ -69,6 +149,198 @@ const MainMenu: React.FC = () => {
           </motion.button>
         </div>
         <LearningStats />
+      </motion.div>
+    );
+  }
+
+  if (showPhonics) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">语音学习 🎵</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowPhonics(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <PhonicsLearning />
+      </motion.div>
+    );
+  }
+
+  if (showSentences) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">句型练习 💬</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowSentences(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <SentenceBuilder />
+      </motion.div>
+    );
+  }
+
+  if (showScenarios) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">情境学习 🎭</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowScenarios(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <ScenarioSimulator />
+      </motion.div>
+    );
+  }
+
+  if (showCulture) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">文化学习 🌍</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowCulture(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <CulturalLearning />
+      </motion.div>
+    );
+  }
+
+  if (showCognitive) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">思维训练 🧠</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowCognitive(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <CognitiveTraining />
+      </motion.div>
+    );
+  }
+
+  if (showDemo) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">项目演示 🎬</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowDemo(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <DemoMode />
+      </motion.div>
+    );
+  }
+
+  if (showAnalytics) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">学习分析 📊</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowAnalytics(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <LearningAnalytics onClose={() => setShowAnalytics(false)} />
+      </motion.div>
+    );
+  }
+
+  if (showTest) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">项目测试 🧪</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowTest(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <ProjectTest />
       </motion.div>
     );
   }
@@ -99,7 +371,7 @@ const MainMenu: React.FC = () => {
         </motion.p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {menuItems.map((item, index) => (
           <motion.div
             key={item.id}

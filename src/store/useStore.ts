@@ -54,7 +54,7 @@ export const useStore = create<AppState>()(
       // 初始状态
       userProgress: initialUserProgress,
       gameProgress: [],
-      currentCategory: 'alphabet',
+      currentCategory: '',
       currentGame: null,
       currentWord: null,
       gameScore: 0,
@@ -152,7 +152,7 @@ export const useStore = create<AppState>()(
       resetProgress: () => set({
         userProgress: initialUserProgress,
         gameProgress: [],
-        currentCategory: 'alphabet',
+        currentCategory: '',
         currentGame: null,
         currentWord: null,
         gameScore: 0,
