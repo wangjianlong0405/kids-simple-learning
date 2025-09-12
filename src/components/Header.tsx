@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Trophy, Target } from 'lucide-react';
+import { Star, Trophy, Target, Volume2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 const Header: React.FC = () => {
@@ -57,6 +57,17 @@ const Header: React.FC = () => {
                 {userProgress.completedWords}/{userProgress.totalWords || 25}
               </span>
             </div>
+
+            {/* 音频测试按钮 */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.dispatchEvent(new CustomEvent('showMobileAudioTest'))}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Volume2 className="w-5 h-5" />
+              <span className="font-bold">音频测试</span>
+            </motion.button>
           </motion.div>
         </div>
 

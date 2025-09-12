@@ -3,9 +3,14 @@ export class MobileAudioHandler {
   private static instance: MobileAudioHandler;
   private isUserInteracted = false;
   private audioContext: AudioContext | null = null;
+  private interactionAttempts = 0;
+  private maxInteractionAttempts = 3;
+  private lastInteractionTime = 0;
+  private interactionCooldown = 1000; // 1秒冷却时间
 
   private constructor() {
     this.setupUserInteraction();
+    this.setupVisibilityChange();
   }
 
   static getInstance(): MobileAudioHandler {
@@ -17,20 +22,59 @@ export class MobileAudioHandler {
 
   private setupUserInteraction() {
     // 监听用户交互事件
-    const events = ['touchstart', 'touchend', 'mousedown', 'keydown'];
+    const events = ['touchstart', 'touchend', 'mousedown', 'keydown', 'click'];
     
-    const handleUserInteraction = () => {
+    const handleUserInteraction = (event: Event) => {
+      const now = Date.now();
+      
+      // 防止频繁触发
+      if (now - this.lastInteractionTime < this.interactionCooldown) {
+        return;
+      }
+      
+      this.lastInteractionTime = now;
       this.isUserInteracted = true;
+      this.interactionAttempts++;
+      
+      console.log('用户交互检测到:', event.type, '尝试次数:', this.interactionAttempts);
+      
       this.resumeAudioContext();
       
+      // 触发自定义事件
+      window.dispatchEvent(new CustomEvent('audioInteractionDetected', {
+        detail: { 
+          eventType: event.type, 
+          attempts: this.interactionAttempts,
+          timestamp: now
+        }
+      }));
+      
       // 移除事件监听器，只需要一次交互
-      events.forEach(event => {
-        document.removeEventListener(event, handleUserInteraction);
-      });
+      if (this.interactionAttempts >= this.maxInteractionAttempts) {
+        events.forEach(event => {
+          document.removeEventListener(event, handleUserInteraction);
+        });
+      }
     };
 
     events.forEach(event => {
-      document.addEventListener(event, handleUserInteraction, { once: true });
+      document.addEventListener(event, handleUserInteraction, { 
+        once: false, // 改为false，允许多次尝试
+        passive: true 
+      });
+    });
+  }
+
+  private setupVisibilityChange() {
+    // 监听页面可见性变化
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // 页面隐藏时暂停音频上下文
+        this.suspendAudioContext();
+      } else {
+        // 页面显示时恢复音频上下文
+        this.resumeAudioContext();
+      }
     });
   }
 
@@ -38,8 +82,20 @@ export class MobileAudioHandler {
     if (this.audioContext && this.audioContext.state === 'suspended') {
       try {
         await this.audioContext.resume();
+        console.log('音频上下文已恢复');
       } catch (error) {
         console.warn('无法恢复音频上下文:', error);
+      }
+    }
+  }
+
+  private async suspendAudioContext() {
+    if (this.audioContext && this.audioContext.state === 'running') {
+      try {
+        await this.audioContext.suspend();
+        console.log('音频上下文已暂停');
+      } catch (error) {
+        console.warn('无法暂停音频上下文:', error);
       }
     }
   }
@@ -54,6 +110,11 @@ export class MobileAudioHandler {
     if (this.isUserInteracted) {
       return '';
     }
+    
+    if (this.interactionAttempts > 0) {
+      return `请再次点击屏幕以启用音频播放功能 (${this.interactionAttempts}/${this.maxInteractionAttempts})`;
+    }
+    
     return '请先点击屏幕以启用音频播放功能';
   }
 
@@ -63,7 +124,8 @@ export class MobileAudioHandler {
       // 显示提示
       const prompt = this.getUserInteractionPrompt();
       if (prompt) {
-        alert(prompt);
+        // 使用更友好的提示方式
+        this.showInteractionPrompt(prompt);
       }
       return false;
     }
@@ -73,11 +135,43 @@ export class MobileAudioHandler {
     return true;
   }
 
+  private showInteractionPrompt(message: string) {
+    // 创建临时提示元素
+    const existingPrompt = document.getElementById('audio-interaction-prompt');
+    if (existingPrompt) {
+      existingPrompt.remove();
+    }
+
+    const prompt = document.createElement('div');
+    prompt.id = 'audio-interaction-prompt';
+    prompt.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md mx-4 bg-yellow-500 text-white p-4 rounded-lg shadow-lg';
+    prompt.innerHTML = `
+      <div class="flex items-center space-x-2">
+        <div class="text-2xl">🔊</div>
+        <div>
+          <div class="font-bold">音频播放需要用户交互</div>
+          <div class="text-sm opacity-90">${message}</div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(prompt);
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+      if (prompt.parentNode) {
+        prompt.parentNode.removeChild(prompt);
+      }
+    }, 3000);
+  }
+
   // 创建音频上下文
   createAudioContext(): AudioContext | null {
     if (!this.audioContext) {
       try {
-        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        this.audioContext = new AudioContextClass();
+        console.log('音频上下文已创建');
       } catch (error) {
         console.warn('无法创建音频上下文:', error);
         return null;
@@ -143,7 +237,12 @@ export class MobileAudioHandler {
 
       // 延迟一点时间确保语音引擎准备就绪
       setTimeout(() => {
-        speechSynthesis.speak(utterance);
+        try {
+          speechSynthesis.speak(utterance);
+        } catch (error) {
+          console.error('TTS播放异常:', error);
+          reject(new Error('TTS播放异常'));
+        }
       }, 50);
     });
   }
@@ -199,8 +298,25 @@ export class MobileAudioHandler {
       isIOS: this.isIOS(),
       isAndroid: this.isAndroid(),
       canPlayAudio: this.canPlayAudio(),
-      userInteractionPrompt: this.getUserInteractionPrompt()
+      userInteractionPrompt: this.getUserInteractionPrompt(),
+      interactionAttempts: this.interactionAttempts,
+      maxInteractionAttempts: this.maxInteractionAttempts
     };
+  }
+
+  // 重置交互状态
+  resetInteraction() {
+    this.isUserInteracted = false;
+    this.interactionAttempts = 0;
+    this.lastInteractionTime = 0;
+    this.setupUserInteraction();
+  }
+
+  // 强制启用音频（用于测试）
+  forceEnableAudio() {
+    this.isUserInteracted = true;
+    this.interactionAttempts = this.maxInteractionAttempts;
+    console.log('音频已强制启用');
   }
 }
 

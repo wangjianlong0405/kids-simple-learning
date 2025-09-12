@@ -348,20 +348,100 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ onComplete }) => 
             <h3 className="text-2xl font-bold text-gray-800 font-kids text-center mb-6">
               角色扮演练习
             </h3>
-            <div className="text-center">
-              <div className="text-6xl mb-4">🎭</div>
-              <p className="text-xl text-gray-600 font-kids mb-6">
-                选择一个角色，练习对话
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowRolePlay(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 font-kids"
-              >
-                开始角色扮演
-              </motion.button>
-            </div>
+            
+            {!showRolePlay ? (
+              <div className="text-center">
+                <div className="text-6xl mb-4">🎭</div>
+                <p className="text-xl text-gray-600 font-kids mb-6">
+                  选择一个角色，练习对话
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowRolePlay(true)}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 font-kids"
+                >
+                  开始角色扮演
+                </motion.button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* 角色选择 */}
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-800 font-kids mb-4">选择你的角色</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {[
+                      { id: 'child', name: '小朋友', avatar: '👶', description: '学习英语的小朋友' },
+                      { id: 'parent', name: '家长', avatar: '👨‍👩‍👧‍👦', description: '陪伴学习的家长' },
+                      { id: 'teacher', name: '老师', avatar: '👩‍🏫', description: '英语老师' }
+                    ].map((role, index) => (
+                      <motion.div
+                        key={role.id}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-blue-300"
+                      >
+                        <div className="text-4xl mb-2">{role.avatar}</div>
+                        <div className="font-bold text-gray-800 font-kids">{role.name}</div>
+                        <div className="text-sm text-gray-600 font-kids">{role.description}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 对话练习 */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl">
+                  <h4 className="text-xl font-bold text-gray-800 font-kids mb-4 text-center">对话练习</h4>
+                  <div className="space-y-4">
+                    {selectedScenario.sentences.map((sentence, index) => (
+                      <motion.div
+                        key={sentence.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.2 }}
+                        className="bg-white p-4 rounded-lg shadow-md"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold font-kids">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-lg font-bold text-blue-600 font-kids mb-1">
+                              {sentence.pattern}
+                            </div>
+                            <div className="text-gray-700 font-kids">
+                              {sentence.chinese}
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full transition-colors"
+                          >
+                            <Volume2 className="w-5 h-5" />
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 返回按钮 */}
+                <div className="text-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowRolePlay(false)}
+                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 font-kids"
+                  >
+                    返回角色选择
+                  </motion.button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

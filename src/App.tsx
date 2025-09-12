@@ -14,6 +14,8 @@ import KeyboardShortcuts from './components/KeyboardShortcuts';
 import HelpModal from './components/HelpModal';
 import AudioCompatibilityDemo from './components/AudioCompatibilityDemo';
 import AudioSystemDashboard from './components/AudioSystemDashboard';
+import MobileAudioTest from './components/MobileAudioTest';
+import MobileAudioInitializer from './components/MobileAudioInitializer';
 import { useStore } from './store/useStore';
 
 function App() {
@@ -22,15 +24,19 @@ function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [showAudioDemo, setShowAudioDemo] = useState(false);
   const [showAudioDashboard, setShowAudioDashboard] = useState(false);
+  const [showMobileAudioTest, setShowMobileAudioTest] = useState(false);
 
   useEffect(() => {
     const handleShowAudioDemo = () => setShowAudioDemo(true);
     const handleShowAudioDashboard = () => setShowAudioDashboard(true);
+    const handleShowMobileAudioTest = () => setShowMobileAudioTest(true);
     window.addEventListener('showAudioDemo', handleShowAudioDemo);
     window.addEventListener('showAudioDashboard', handleShowAudioDashboard);
+    window.addEventListener('showMobileAudioTest', handleShowMobileAudioTest);
     return () => {
       window.removeEventListener('showAudioDemo', handleShowAudioDemo);
       window.removeEventListener('showAudioDashboard', handleShowAudioDashboard);
+      window.removeEventListener('showMobileAudioTest', handleShowMobileAudioTest);
     };
   }, []);
 
@@ -90,6 +96,9 @@ function App() {
           onRemove={removeNotification} 
         />
         
+        {/* 移动端音频初始化器 */}
+        <MobileAudioInitializer />
+        
         {/* 键盘快捷键 */}
         <KeyboardShortcuts onShowHelp={() => setShowHelp(true)} />
         
@@ -129,6 +138,24 @@ function App() {
                 </button>
               </div>
               <AudioSystemDashboard />
+            </div>
+          </div>
+        )}
+        
+        {/* 移动端音频测试 */}
+        {showMobileAudioTest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">📱 移动端音频测试</h2>
+                <button
+                  onClick={() => setShowMobileAudioTest(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <MobileAudioTest />
             </div>
           </div>
         )}
