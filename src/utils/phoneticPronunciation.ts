@@ -25,26 +25,26 @@ export class PhoneticPronunciation {
     return this.audioContext;
   }
 
-  // 音标发音映射表 - 使用更准确的发音
+  // 音标发音映射表 - 使用更准确的发音和TTS友好的转写
   private getPhoneticPronunciation(symbol: string): string {
     const pronunciationMap: { [key: string]: string } = {
-      // 元音
-      'æ': 'æ', // cat
+      // 元音 - 使用TTS友好的转写
+      'æ': 'a', // cat - 使用"a"而不是"æ"，TTS更容易识别
       'e': 'e', // bed
-      'ɪ': 'ɪ', // sit
-      'ɒ': 'ɒ', // hot
-      'ʌ': 'ʌ', // cup
-      'eɪ': 'eɪ', // cake
-      'iː': 'iː', // bee
-      'oʊ': 'oʊ', // boat
+      'ɪ': 'i', // sit - 使用"i"而不是"ɪ"
+      'ɒ': 'o', // hot - 使用"o"而不是"ɒ"
+      'ʌ': 'u', // cup - 使用"u"而不是"ʌ"
+      'eɪ': 'ay', // cake - 使用"ay"而不是"eɪ"
+      'iː': 'ee', // bee - 使用"ee"而不是"iː"
+      'oʊ': 'oh', // boat - 使用"oh"而不是"oʊ"
       
-      // 辅音
+      // 辅音 - 保持原样，TTS通常能正确识别
       'b': 'b', // ball
       'p': 'p', // pig
       't': 't', // top
       'd': 'd', // dog
       'k': 'k', // cat
-      'ɡ': 'ɡ', // goat
+      'ɡ': 'g', // goat - 使用"g"而不是"ɡ"
       'f': 'f', // fish
       'v': 'v', // van
       's': 's', // sun
@@ -55,14 +55,46 @@ export class PhoneticPronunciation {
       'r': 'r', // red
       'h': 'h', // hat
       'w': 'w', // water
-      'j': 'j', // yes
+      'j': 'y', // yes - 使用"y"而不是"j"
     };
 
     return pronunciationMap[symbol] || symbol;
   }
 
+  // 检查音频文件是否存在
+  private async checkAudioFileExists(audioUrl: string): Promise<boolean> {
+    try {
+      const response = await fetch(audioUrl, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.log(`音频文件不存在: ${audioUrl}`);
+      return false;
+    }
+  }
+
   // 使用Web Speech API播放音标
-  async playPhoneticSymbol(symbol: string): Promise<void> {
+  async playPhoneticSymbol(symbol: string, audioUrl?: string): Promise<void> {
+    // 首先尝试播放音频文件（如果提供且存在）
+    if (audioUrl) {
+      try {
+        const audioExists = await this.checkAudioFileExists(audioUrl);
+        if (audioExists) {
+          console.log(`使用音频文件播放音标: ${symbol}`);
+          try {
+            return await this.playAudioFile(audioUrl);
+          } catch (audioError) {
+            console.log(`音频文件播放失败，降级到TTS: ${audioError}`);
+            // 继续执行TTS降级
+          }
+        } else {
+          console.log(`音频文件不存在，降级到TTS: ${audioUrl}`);
+        }
+      } catch (error) {
+        console.log(`音频文件检查失败，降级到TTS: ${error}`);
+      }
+    }
+
+    // 降级到TTS播放
     if (!('speechSynthesis' in window)) {
       throw new Error('浏览器不支持语音合成');
     }
@@ -170,6 +202,60 @@ export class PhoneticPronunciation {
           speakWithVoice();
         }
       }, 100); // 给100ms延迟确保停止完成
+    });
+  }
+
+  // 播放音频文件
+  private async playAudioFile(audioUrl: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio(audioUrl);
+      let hasResolved = false;
+      
+      // 设置超时，防止长时间等待
+      const timeout = setTimeout(() => {
+        if (!hasResolved) {
+          hasResolved = true;
+          console.log(`音频加载超时，降级到TTS: ${audioUrl}`);
+          reject(new Error(`音频加载超时: ${audioUrl}`));
+        }
+      }, 3000); // 3秒超时
+      
+      audio.onloadeddata = () => {
+        console.log(`音频文件加载完成: ${audioUrl}`);
+      };
+      
+      audio.oncanplaythrough = () => {
+        console.log(`开始播放音频文件: ${audioUrl}`);
+        audio.play().catch(error => {
+          if (!hasResolved) {
+            hasResolved = true;
+            clearTimeout(timeout);
+            console.error('音频播放失败:', error);
+            reject(new Error(`音频播放失败: ${error.message}`));
+          }
+        });
+      };
+      
+      audio.onended = () => {
+        if (!hasResolved) {
+          hasResolved = true;
+          clearTimeout(timeout);
+          console.log('音频播放结束');
+          resolve();
+        }
+      };
+      
+      audio.onerror = (error) => {
+        if (!hasResolved) {
+          hasResolved = true;
+          clearTimeout(timeout);
+          console.error('音频加载失败:', error);
+          reject(new Error(`音频加载失败: ${audioUrl}`));
+        }
+      };
+      
+      // 开始加载音频
+      audio.load();
     });
   }
 

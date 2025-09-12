@@ -63,7 +63,7 @@ const PhonicsLearning: React.FC = () => {
       // 使用专门的音标发音系统
       if (phoneticPronunciation.isSupported()) {
         console.log('使用音标发音系统');
-        await phoneticPronunciation.playPhoneticSymbol(symbol.sound);
+        await phoneticPronunciation.playPhoneticSymbol(symbol.sound, symbol.audioUrl);
       } else {
         console.log('降级到普通TTS');
         // 降级到普通TTS
@@ -96,6 +96,8 @@ const PhonicsLearning: React.FC = () => {
           setError('音标播放被中断，请稍后重试');
         } else if (error.message.includes('重试失败')) {
           setError('音标播放重试失败，请检查音频设置');
+        } else if (error.message.includes('音频加载失败')) {
+          setError('音频文件加载失败，已自动切换到语音合成播放');
         } else {
           setError(`音标发音播放失败：${error.message}`);
         }
