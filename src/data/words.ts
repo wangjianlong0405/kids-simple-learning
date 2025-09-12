@@ -268,7 +268,6 @@ export const categories = [
   { id: 'body', name: '身体', icon: '👤', color: 'bg-pink-500' },
   { id: 'food', name: '食物', icon: '🍽️', color: 'bg-indigo-500' },
   { id: 'toy', name: '玩具', icon: '🧸', color: 'bg-teal-500' },
-  { id: 'phrase', name: '短语', icon: '💬', color: 'bg-cyan-500' },
   { id: 'object', name: '物品', icon: '📦', color: 'bg-gray-500' },
   { id: 'nature', name: '自然', icon: '🌿', color: 'bg-emerald-500' },
 ];
