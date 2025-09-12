@@ -1,0 +1,114 @@
+@startuml 幼儿英语学习小程序流程图
+
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam componentStyle rectangle
+
+title 幼儿英语学习小程序系统架构图
+
+package "前端界面层" {
+  component [主菜单界面] as MainMenu
+  component [分类选择界面] as CategoryMenu
+  component [词汇学习卡片] as WordCard
+  component [游戏界面] as GameInterface
+  component [进度监控面板] as ProgressPanel
+  component [头部导航] as Header
+}
+
+package "游戏模块" {
+  component [配对游戏] as MatchingGame
+  component [听音识词游戏] as ListeningGame
+  component [拼写游戏] as SpellingGame
+  component [拼图游戏] as PuzzleGame
+}
+
+package "状态管理层" {
+  component [Zustand Store] as Store
+  component [用户进度] as UserProgress
+  component [游戏状态] as GameState
+  component [音频状态] as AudioState
+}
+
+package "数据层" {
+  component [词汇数据] as WordsData
+  component [分类数据] as CategoriesData
+  component [游戏数据] as GamesData
+  component [本地存储] as LocalStorage
+}
+
+package "功能模块" {
+  component [音频播放] as AudioPlayer
+  component [进度跟踪] as ProgressTracker
+  component [成就系统] as AchievementSystem
+  component [动画效果] as Animations
+}
+
+' 用户交互流程
+MainMenu --> CategoryMenu : 选择学习类别
+CategoryMenu --> WordCard : 选择具体单词
+WordCard --> GameInterface : 开始游戏
+GameInterface --> MatchingGame : 配对游戏
+GameInterface --> ListeningGame : 听音识词
+GameInterface --> SpellingGame : 拼写游戏
+GameInterface --> PuzzleGame : 拼图游戏
+
+' 状态管理
+Store --> UserProgress : 管理学习进度
+Store --> GameState : 管理游戏状态
+Store --> AudioState : 管理音频播放
+
+' 数据流向
+WordsData --> WordCard : 提供词汇内容
+CategoriesData --> CategoryMenu : 提供分类信息
+GamesData --> GameInterface : 提供游戏配置
+LocalStorage --> Store : 持久化数据
+
+' 功能模块连接
+AudioPlayer --> WordCard : 播放单词发音
+AudioPlayer --> ListeningGame : 播放音频题目
+ProgressTracker --> Store : 更新学习进度
+AchievementSystem --> ProgressPanel : 显示成就
+Animations --> MainMenu : 界面动画效果
+Animations --> GameInterface : 游戏动画效果
+
+' 进度监控
+ProgressPanel --> Store : 读取进度数据
+ProgressPanel --> AchievementSystem : 显示成就状态
+
+' 数据持久化
+Store --> LocalStorage : 保存学习进度
+LocalStorage --> Store : 恢复学习状态
+
+note right of MainMenu
+  欢迎界面
+  - 开始学习
+  - 游戏乐园
+  - 我的成就
+  - 设置
+end note
+
+note right of WordCard
+  单词学习界面
+  - 显示单词和图片
+  - 播放标准发音
+  - 互动练习
+  - 进度跟踪
+end note
+
+note right of GameInterface
+  游戏中心
+  - 4种游戏模式
+  - 实时计分
+  - 难度调节
+  - 成就解锁
+end note
+
+note right of Store
+  状态管理中心
+  - 用户学习进度
+  - 游戏状态管理
+  - 音频播放控制
+  - 数据持久化
+end note
+
+@enduml
