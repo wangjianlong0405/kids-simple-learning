@@ -3,18 +3,39 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Volume2, VolumeX, RotateCcw, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import AudioPlayer from './AudioPlayer';
+import { mobileAudioHandler } from '../utils/mobileAudioHandler';
+import ErrorToast from './ErrorToast';
+import { playSuccessSound, playErrorSound, playClickSound } from '../utils/audioFeedback';
 
 const WordCard: React.FC = () => {
   const { currentWord, setCurrentWord, playAudio, isPlaying, stopAudio } = useStore();
   const [showAnswer, setShowAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!currentWord) return null;
 
   const handlePlayAudio = async () => {
-    // 模拟音频播放
-    console.log('播放音频:', currentWord.english);
-    // 这里可以集成真实的TTS API
+    try {
+      // 检查移动端音频限制
+      if (mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio()) {
+        const prompt = mobileAudioHandler.getUserInteractionPrompt();
+        setError(prompt);
+        return;
+      }
+
+      // 使用TTS播放单词发音
+      await mobileAudioHandler.playTTS(currentWord.english, {
+        lang: 'en-US',
+        rate: 0.7,
+        pitch: 1.2,
+        volume: 0.8
+      });
+      setError(null);
+    } catch (error) {
+      console.error('音频播放失败:', error);
+      setError('音频播放失败，请检查设备音频设置');
+    }
   };
 
   const handleAnswer = (userAnswer: string) => {
@@ -24,6 +45,11 @@ const WordCard: React.FC = () => {
     if (correct) {
       // 更新进度
       useStore.getState().updateGameProgress(currentWord.id, true, 10);
+      // 播放成功音效
+      playSuccessSound();
+    } else {
+      // 播放错误音效
+      playErrorSound();
     }
   };
 
@@ -112,12 +138,27 @@ const WordCard: React.FC = () => {
 
             {/* 音频播放按钮 */}
             <div className="flex justify-center">
-              <AudioPlayer 
-                text={currentWord.english}
-                language="en"
-                onPlayStart={() => console.log('开始播放')}
-                onPlayEnd={() => console.log('播放结束')}
-              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePlayAudio}
+                className={`
+                  flex items-center space-x-3 px-8 py-4 rounded-full text-white font-bold text-lg
+                  ${isPlaying 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : 'bg-blue-500 hover:bg-blue-600'
+                  } transition-all duration-300
+                `}
+              >
+                {isPlaying ? (
+                  <VolumeX className="w-6 h-6" />
+                ) : (
+                  <Volume2 className="w-6 h-6" />
+                )}
+                <span className="font-kids">
+                  {isPlaying ? '停止播放' : '点击播放发音'}
+                </span>
+              </motion.button>
             </div>
           </div>
         </motion.div>
@@ -165,7 +206,10 @@ const WordCard: React.FC = () => {
                   }}
                 />
                 <button
-                  onClick={() => setShowAnswer(true)}
+                  onClick={() => {
+                    setShowAnswer(true);
+                    playClickSound();
+                  }}
                   className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 font-kids"
                 >
                   显示答案
@@ -223,6 +267,16 @@ const WordCard: React.FC = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* 错误提示 */}
+      {error && (
+        <ErrorToast
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+          show={!!error}
+        />
+      )}
     </motion.div>
   );
 };

@@ -3,6 +3,10 @@ import { motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { wordsData } from '../../data/words';
+import ErrorToast from '../ErrorToast';
+import { mobileAudioHandler } from '../../utils/mobileAudioHandler';
+import { playSuccessSound, playErrorSound, playGameStartSound, playGameEndSound } from '../../utils/audioFeedback';
+import LoadingSpinner from '../LoadingSpinner';
 
 interface ListeningGameProps {
   onComplete: (score: number, success: boolean) => void;
@@ -19,12 +23,16 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onComplete }) => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [gameComplete, setGameComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
   const maxRounds = 5;
 
   // 初始化游戏
   useEffect(() => {
     initializeGame();
+    // 播放游戏开始音效
+    playGameStartSound();
   }, [currentCategory]);
 
   const initializeGame = () => {
@@ -61,9 +69,29 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onComplete }) => {
 
   const handlePlayAudio = async () => {
     if (currentWord) {
-      // 模拟音频播放
-      console.log('播放音频:', currentWord.english);
-      // 这里可以集成真实的TTS API
+      setIsLoadingAudio(true);
+      try {
+        // 检查移动端音频限制
+        if (mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio()) {
+          const prompt = mobileAudioHandler.getUserInteractionPrompt();
+          setError(prompt);
+          return;
+        }
+
+        // 使用TTS播放单词发音
+        await mobileAudioHandler.playTTS(currentWord.english, {
+          lang: 'en-US',
+          rate: 0.7,
+          pitch: 1.2,
+          volume: 0.8
+        });
+        setError(null); // 清除之前的错误
+      } catch (error) {
+        console.error('音频播放失败:', error);
+        setError('音频播放失败，请检查设备音频设置或点击重试');
+      } finally {
+        setIsLoadingAudio(false);
+      }
     }
   };
 
@@ -78,12 +106,19 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onComplete }) => {
     
     if (isCorrectAnswer) {
       setScore(prev => prev + 10);
+      // 播放成功音效
+      playSuccessSound();
+    } else {
+      // 播放错误音效
+      playErrorSound();
     }
     
     // 延迟后进入下一题或结束游戏
     setTimeout(() => {
       if (currentRound + 1 >= maxRounds) {
         setGameComplete(true);
+        // 播放游戏结束音效
+        playGameEndSound();
         onComplete(score + (isCorrectAnswer ? 10 : 0), score + (isCorrectAnswer ? 10 : 0) >= 30);
       } else {
         setCurrentRound(prev => prev + 1);
@@ -146,21 +181,26 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onComplete }) => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={handlePlayAudio}
+          disabled={isLoadingAudio}
           className={`
             flex items-center space-x-3 mx-auto px-8 py-4 rounded-full text-white font-bold text-lg
-            ${isPlaying 
-              ? 'bg-red-500 hover:bg-red-600' 
-              : 'bg-blue-500 hover:bg-blue-600'
+            ${isLoadingAudio 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : isPlaying 
+                ? 'bg-red-500 hover:bg-red-600' 
+                : 'bg-blue-500 hover:bg-blue-600'
             } transition-all duration-300
           `}
         >
-          {isPlaying ? (
+          {isLoadingAudio ? (
+            <LoadingSpinner size="sm" text="" />
+          ) : isPlaying ? (
             <VolumeX className="w-6 h-6" />
           ) : (
             <Volume2 className="w-6 h-6" />
           )}
           <span className="font-kids">
-            {isPlaying ? '停止播放' : '点击播放发音'}
+            {isLoadingAudio ? '加载中...' : isPlaying ? '停止播放' : '点击播放发音'}
           </span>
         </motion.button>
         
@@ -234,6 +274,16 @@ const ListeningGame: React.FC<ListeningGameProps> = ({ onComplete }) => {
           重新开始
         </motion.button>
       </div>
+
+      {/* 错误提示 */}
+      {error && (
+        <ErrorToast
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+          show={!!error}
+        />
+      )}
     </div>
   );
 };

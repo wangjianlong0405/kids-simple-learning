@@ -4,6 +4,8 @@ import { Volume2, VolumeX, RotateCcw, Star, Target } from 'lucide-react';
 import PhoneticSymbol from './PhoneticSymbol';
 import { phoneticSymbols, phonicsCategories } from '../../data/phonics';
 import { PhoneticSymbol as PhoneticSymbolType } from '../../types';
+import ErrorToast from '../ErrorToast';
+import { mobileAudioHandler } from '../../utils/mobileAudioHandler';
 
 const PhonicsLearning: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -12,6 +14,7 @@ const PhonicsLearning: React.FC = () => {
   const [practiceMode, setPracticeMode] = useState(false);
   const [practiceScore, setPracticeScore] = useState(0);
   const [practiceAttempts, setPracticeAttempts] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredSymbols = selectedCategory === 'all' 
     ? phoneticSymbols 
@@ -28,13 +31,28 @@ const PhonicsLearning: React.FC = () => {
     setCurrentSymbol(symbol);
     setIsPlaying(true);
 
-    // 模拟音频播放
-    console.log('播放音标发音:', symbol.symbol, symbol.sound);
-    
-    // 这里可以集成真实的TTS API
-    setTimeout(() => {
+    try {
+      // 检查移动端音频限制
+      if (mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio()) {
+        const prompt = mobileAudioHandler.getUserInteractionPrompt();
+        setError(prompt);
+        setIsPlaying(false);
+        return;
+      }
+
+      // 使用TTS播放音标发音
+      await mobileAudioHandler.playTTS(symbol.sound, {
+        lang: 'en-US',
+        rate: 0.7,
+        pitch: 1.2,
+        volume: 0.8
+      });
       setIsPlaying(false);
-    }, 2000);
+    } catch (error) {
+      console.error('音标播放失败:', error);
+      setIsPlaying(false);
+      setError('音标发音播放失败，请检查设备音频设置');
+    }
   };
 
   const startPractice = () => {
@@ -252,6 +270,16 @@ const PhonicsLearning: React.FC = () => {
           <p>• 使用练习模式进行系统训练</p>
         </div>
       </motion.div>
+
+      {/* 错误提示 */}
+      {error && (
+        <ErrorToast
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+          show={!!error}
+        />
+      )}
     </div>
   );
 };

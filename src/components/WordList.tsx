@@ -6,13 +6,17 @@ import { wordsData } from '../data/words';
 
 interface WordListProps {
   category?: string;
+  onBack?: () => void;
 }
 
-const WordList: React.FC<WordListProps> = ({ category }) => {
+const WordList: React.FC<WordListProps> = ({ category, onBack }) => {
   const { currentCategory, setCurrentCategory, setCurrentWord } = useStore();
 
   const handleBackToCategories = () => {
-    if (category) {
+    if (onBack) {
+      // 如果有自定义的返回处理函数，使用它
+      onBack();
+    } else if (category) {
       // 如果是从主菜单直接进入的短语学习，返回主菜单
       setCurrentCategory('');
     } else {
@@ -55,6 +59,8 @@ const WordList: React.FC<WordListProps> = ({ category }) => {
           {currentCategory === 'animal' && '🐾 动物'}
           {currentCategory === 'fruit' && '🍎 水果'}
           {currentCategory === 'family' && '👨‍👩‍👧‍👦 家庭'}
+          {currentCategory === 'phrase' && '💬 短语学习'}
+          {category === 'phrase' && '💬 短语学习'}
         </h3>
         <p className="text-white/80 text-lg font-kids">
           点击单词卡片开始学习

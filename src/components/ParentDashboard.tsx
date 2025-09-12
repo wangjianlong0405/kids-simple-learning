@@ -27,20 +27,42 @@ const ParentDashboard: React.FC = () => {
   }, [gameProgress]);
 
   const calculateTimeSpent = () => {
-    // 假设每个单词学习需要2分钟，每个游戏需要5分钟
-    const wordTime = gameProgress.filter(p => p.completed).length * 2;
-    const gameTime = Math.floor(gameProgress.length / 5) * 5;
+    // 基于实际学习记录计算时间
+    const completedWords = gameProgress.filter(p => p.completed).length;
+    const totalGames = Math.ceil(gameProgress.length / 5); // 每个游戏5个单词
+    
+    // 更准确的时间估算：每个单词学习3分钟，每个游戏10分钟
+    const wordTime = completedWords * 3;
+    const gameTime = totalGames * 10;
     setTimeSpent(wordTime + gameTime);
   };
 
   const generateWeeklyData = () => {
     const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    const data = days.map((day, index) => ({
-      day,
-      words: Math.floor(Math.random() * 10) + 1, // 模拟数据
-      games: Math.floor(Math.random() * 3) + 1,
-      time: Math.floor(Math.random() * 30) + 10
-    }));
+    const now = new Date();
+    
+    const data = days.map((day, index) => {
+      // 计算过去7天中每一天的学习数据
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - (6 - index));
+      const targetDateString = targetDate.toDateString();
+      
+      // 获取当天的学习记录
+      const dayProgress = gameProgress.filter(p => 
+        p.lastPlayed && new Date(p.lastPlayed).toDateString() === targetDateString
+      );
+      
+      const completedWords = dayProgress.filter(p => p.completed).length;
+      const games = Math.ceil(dayProgress.length / 5);
+      const time = completedWords * 3 + games * 10; // 基于实际数据计算时间
+      
+      return {
+        day,
+        words: completedWords,
+        games: games,
+        time: time
+      };
+    });
     setWeeklyData(data);
   };
 

@@ -5,13 +5,11 @@ import AudioPlayer from './AudioPlayer';
 import EnhancedAudioPlayer from './EnhancedAudioPlayer';
 import AudioCompatibilityTest from './AudioCompatibilityTest';
 import { AudioCompatibilityManager, CompatibilityTester } from '../utils/audioCompatibility';
-import { getAudioUrl, preloadCommonAudio } from '../data/audioUrls';
+import { getAudioUrl } from '../data/audioUrls';
 
 const AudioCompatibilityDemo: React.FC = () => {
   const [compatibility, setCompatibility] = useState<any>(null);
   const [testResults, setTestResults] = useState<any>(null);
-  const [preloadResults, setPreloadResults] = useState<string[]>([]);
-  const [isPreloading, setIsPreloading] = useState(false);
   const [currentWord, setCurrentWord] = useState('apple');
   const [showTest, setShowTest] = useState(false);
 
@@ -23,17 +21,6 @@ const AudioCompatibilityDemo: React.FC = () => {
     CompatibilityTester.testAudioSupport().then(setTestResults);
   }, []);
 
-  const handlePreload = async () => {
-    setIsPreloading(true);
-    try {
-      const results = await preloadCommonAudio();
-      setPreloadResults(results);
-    } catch (error) {
-      console.error('Preload failed:', error);
-    } finally {
-      setIsPreloading(false);
-    }
-  };
 
   const testWords = [
     { id: 'apple', text: 'Apple', category: '水果' },
@@ -153,40 +140,6 @@ const AudioCompatibilityDemo: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* 预加载测试 */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-lg p-6"
-      >
-        <h2 className="text-xl font-bold mb-4">⚡ 音频预加载测试</h2>
-        
-        <div className="mb-4">
-          <button
-            onClick={handlePreload}
-            disabled={isPreloading}
-            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-          >
-            {isPreloading ? '预加载中...' : '开始预加载'}
-          </button>
-        </div>
-
-        {preloadResults.length > 0 && (
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-800 mb-2">
-              ✅ 预加载成功 ({preloadResults.length} 个文件)
-            </h3>
-            <div className="text-sm text-green-700">
-              {preloadResults.map(url => (
-                <div key={url} className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>{url}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </motion.div>
 
       {/* 详细测试 */}
       <motion.div

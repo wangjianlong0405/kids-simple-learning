@@ -69,13 +69,29 @@ const LearningPlan: React.FC = () => {
   const generateWeeklyPlan = () => {
     const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     const categories = ['alphabet', 'number', 'color', 'animal', 'fruit', 'family'];
+    const now = new Date();
     
-    const plan = weekDays.map((day, index) => ({
-      day,
-      category: categories[index % categories.length],
-      focus: getCategoryFocus(categories[index % categories.length]),
-      completed: Math.random() > 0.5 // 模拟完成状态
-    }));
+    const plan = weekDays.map((day, index) => {
+      // 计算过去7天中每一天的学习数据
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - (6 - index));
+      const targetDateString = targetDate.toDateString();
+      
+      // 获取当天的学习记录
+      const dayProgress = gameProgress.filter(p => 
+        p.lastPlayed && new Date(p.lastPlayed).toDateString() === targetDateString
+      );
+      
+      const category = categories[index % categories.length];
+      const completed = dayProgress.length > 0; // 基于实际学习记录判断是否完成
+      
+      return {
+        day,
+        category,
+        focus: getCategoryFocus(category),
+        completed
+      };
+    });
 
     setWeeklyPlan(plan);
   };

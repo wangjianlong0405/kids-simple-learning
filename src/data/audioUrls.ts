@@ -1,122 +1,51 @@
-// 预录音频URL配置
+// TTS音频配置 - 使用Web Speech API而不是预录文件
 export const audioUrls: Record<string, string> = {
-  // 字母发音
-  'a': '/audio/alphabet/a.mp3',
-  'b': '/audio/alphabet/b.mp3',
-  'c': '/audio/alphabet/c.mp3',
-  'd': '/audio/alphabet/d.mp3',
-  'e': '/audio/alphabet/e.mp3',
-  'f': '/audio/alphabet/f.mp3',
-  'g': '/audio/alphabet/g.mp3',
-  'h': '/audio/alphabet/h.mp3',
-  'i': '/audio/alphabet/i.mp3',
-  'j': '/audio/alphabet/j.mp3',
-  'k': '/audio/alphabet/k.mp3',
-  'l': '/audio/alphabet/l.mp3',
-  'm': '/audio/alphabet/m.mp3',
-  'n': '/audio/alphabet/n.mp3',
-  'o': '/audio/alphabet/o.mp3',
-  'p': '/audio/alphabet/p.mp3',
-  'q': '/audio/alphabet/q.mp3',
-  'r': '/audio/alphabet/r.mp3',
-  's': '/audio/alphabet/s.mp3',
-  't': '/audio/alphabet/t.mp3',
-  'u': '/audio/alphabet/u.mp3',
-  'v': '/audio/alphabet/v.mp3',
-  'w': '/audio/alphabet/w.mp3',
-  'x': '/audio/alphabet/x.mp3',
-  'y': '/audio/alphabet/y.mp3',
-  'z': '/audio/alphabet/z.mp3',
-
-  // 数字发音
-  '1': '/audio/numbers/one.mp3',
-  '2': '/audio/numbers/two.mp3',
-  '3': '/audio/numbers/three.mp3',
-  '4': '/audio/numbers/four.mp3',
-  '5': '/audio/numbers/five.mp3',
-  '6': '/audio/numbers/six.mp3',
-  '7': '/audio/numbers/seven.mp3',
-  '8': '/audio/numbers/eight.mp3',
-  '9': '/audio/numbers/nine.mp3',
-  '10': '/audio/numbers/ten.mp3',
-
-  // 颜色发音
-  'red': '/audio/colors/red.mp3',
-  'blue': '/audio/colors/blue.mp3',
-  'green': '/audio/colors/green.mp3',
-  'yellow': '/audio/colors/yellow.mp3',
-  'purple': '/audio/colors/purple.mp3',
-  'orange-color': '/audio/colors/orange.mp3',
-  'pink': '/audio/colors/pink.mp3',
-  'brown': '/audio/colors/brown.mp3',
-  'black': '/audio/colors/black.mp3',
-  'white': '/audio/colors/white.mp3',
-
-  // 动物发音
-  'cat': '/audio/animals/cat.mp3',
-  'dog': '/audio/animals/dog.mp3',
-  'bird': '/audio/animals/bird.mp3',
-  'fish': '/audio/animals/fish.mp3',
-  'rabbit': '/audio/animals/rabbit.mp3',
-  'elephant': '/audio/animals/elephant.mp3',
-  'lion': '/audio/animals/lion.mp3',
-  'tiger': '/audio/animals/tiger.mp3',
-  'bear': '/audio/animals/bear.mp3',
-  'monkey': '/audio/animals/monkey.mp3',
-
-  // 水果发音
-  'apple': '/audio/fruits/apple.mp3',
-  'banana': '/audio/fruits/banana.mp3',
-  'orange-fruit': '/audio/fruits/orange.mp3',
-  'grape': '/audio/fruits/grape.mp3',
-  'strawberry': '/audio/fruits/strawberry.mp3',
-  'watermelon': '/audio/fruits/watermelon.mp3',
-  'pineapple': '/audio/fruits/pineapple.mp3',
-  'peach': '/audio/fruits/peach.mp3',
-  'pear': '/audio/fruits/pear.mp3',
-  'cherry': '/audio/fruits/cherry.mp3',
-
-  // 家庭成员发音
-  'mom': '/audio/family/mom.mp3',
-  'dad': '/audio/family/dad.mp3',
-  'sister': '/audio/family/sister.mp3',
-  'brother': '/audio/family/brother.mp3',
-  'baby': '/audio/family/baby.mp3',
-  'grandma': '/audio/family/grandma.mp3',
-  'grandpa': '/audio/family/grandpa.mp3',
-  'aunt': '/audio/family/aunt.mp3',
-  'uncle': '/audio/family/uncle.mp3',
-  'cousin': '/audio/family/cousin.mp3',
+  // 注意：这些URL仅作为备用，实际使用TTS
+  // 如果将来需要预录文件，可以取消注释并添加真实文件
 };
 
-// 获取单词的音频URL
+// 获取单词的音频URL（TTS模式）
 export const getAudioUrl = (wordId: string): string | null => {
-  return audioUrls[wordId] || null;
+  // 在TTS模式下，返回null表示使用TTS而不是预录文件
+  return null;
 };
 
-// 检查音频文件是否存在
-export const checkAudioExists = async (url: string): Promise<boolean> => {
-  try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
+// 检查TTS支持
+export const checkTTSSupport = (): boolean => {
+  return 'speechSynthesis' in window;
+};
+
+// 获取TTS语音列表
+export const getTTSVoices = (): SpeechSynthesisVoice[] => {
+  if (!('speechSynthesis' in window)) {
+    return [];
   }
+  return speechSynthesis.getVoices();
 };
 
-// 预加载常用音频
-export const preloadCommonAudio = async (): Promise<string[]> => {
-  const commonWords = ['a', 'b', 'c', '1', '2', '3', 'red', 'blue', 'cat', 'dog', 'apple', 'banana'];
-  const urls = commonWords.map(word => getAudioUrl(word)).filter(Boolean) as string[];
+// 获取最佳TTS语音
+export const getBestTTSVoice = (): SpeechSynthesisVoice | null => {
+  const voices = getTTSVoices();
+  if (voices.length === 0) return null;
   
-  const results = await Promise.allSettled(
-    urls.map(url => checkAudioExists(url))
+  // 优先选择英语语音
+  const englishVoices = voices.filter(voice => 
+    voice.lang.startsWith('en') || voice.lang.startsWith('en-')
   );
   
-  return urls.filter((_, index) => 
-    results[index].status === 'fulfilled' && 
-    (results[index] as PromiseFulfilledResult<boolean>).value
-  );
+  if (englishVoices.length > 0) {
+    // 优先选择女性语音（通常更适合儿童）
+    const femaleVoices = englishVoices.filter(voice => 
+      voice.name.toLowerCase().includes('female') || 
+      voice.name.toLowerCase().includes('woman') ||
+      voice.name.toLowerCase().includes('samantha') ||
+      voice.name.toLowerCase().includes('karen')
+    );
+    
+    return femaleVoices.length > 0 ? femaleVoices[0] : englishVoices[0];
+  }
+  
+  return voices[0];
 };
 
 // 音频质量配置
