@@ -4,11 +4,21 @@ import { ArrowLeft } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { wordsData } from '../data/words';
 
-const WordList: React.FC = () => {
+interface WordListProps {
+  category?: string;
+}
+
+const WordList: React.FC<WordListProps> = ({ category }) => {
   const { currentCategory, setCurrentCategory, setCurrentWord } = useStore();
 
   const handleBackToCategories = () => {
-    setCurrentCategory('menu');
+    if (category) {
+      // 如果是从主菜单直接进入的短语学习，返回主菜单
+      setCurrentCategory('');
+    } else {
+      // 如果是从分类菜单进入的，返回分类菜单
+      setCurrentCategory('menu');
+    }
   };
 
   const handleWordSelect = (word: any) => {
@@ -16,7 +26,8 @@ const WordList: React.FC = () => {
   };
 
   // 获取当前类别的词汇
-  const categoryWords = wordsData.filter(word => word.category === currentCategory);
+  const targetCategory = category || currentCategory;
+  const categoryWords = wordsData.filter(word => word.category === targetCategory);
 
   return (
     <motion.div

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, BookOpen, Gamepad2, Settings, BarChart3, Volume2, MessageSquare, Globe, Brain, Users, Monitor, TrendingUp, TestTube } from 'lucide-react';
+import { Play, BookOpen, Gamepad2, Settings, BarChart3, Volume2, MessageSquare, Globe, Brain, Users, Monitor, TrendingUp, TestTube, MessageCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import LearningStats from './LearningStats';
 import PhonicsLearning from './phonics/PhonicsLearning';
@@ -11,6 +11,7 @@ import CognitiveTraining from './cognitive/CognitiveTraining';
 import DemoMode from './DemoMode';
 import LearningAnalytics from './LearningAnalytics';
 import ProjectTest from './ProjectTest';
+import WordList from './WordList';
 import { welcomeEffects } from '../utils/welcomeEffects';
 
 const MainMenu: React.FC = () => {
@@ -24,6 +25,7 @@ const MainMenu: React.FC = () => {
   const [showDemo, setShowDemo] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showTest, setShowTest] = useState(false);
+  const [showPhrases, setShowPhrases] = useState(false);
 
   useEffect(() => {
     // 播放欢迎音效
@@ -38,6 +40,14 @@ const MainMenu: React.FC = () => {
       icon: <BookOpen className="w-8 h-8" />,
       color: 'from-blue-500 to-cyan-500',
       action: () => setCurrentCategory('menu')
+    },
+    {
+      id: 'phrases',
+      title: '短语学习',
+      subtitle: 'Learn Phrases',
+      icon: <MessageCircle className="w-8 h-8" />,
+      color: 'from-cyan-500 to-teal-500',
+      action: () => setShowPhrases(true)
     },
     {
       id: 'phonics',
@@ -128,6 +138,30 @@ const MainMenu: React.FC = () => {
       action: () => setShowSettings(true)
     }
   ];
+
+  if (showPhrases) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-white font-kids">短语学习 💬</h2>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowPhrases(false)}
+            className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-300 font-kids"
+          >
+            返回
+          </motion.button>
+        </div>
+        <WordList category="phrase" />
+      </motion.div>
+    );
+  }
 
   if (showStats) {
     return (
