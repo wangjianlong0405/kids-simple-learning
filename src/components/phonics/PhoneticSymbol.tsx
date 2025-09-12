@@ -2,19 +2,41 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX, Play, Pause } from 'lucide-react';
 import { PhoneticSymbol as PhoneticSymbolType } from '../../types';
+import { phoneticPronunciation } from '../../utils/phoneticPronunciation';
 
 interface PhoneticSymbolProps {
   symbol: PhoneticSymbolType;
   onPlay: (symbol: PhoneticSymbolType) => void;
   isPlaying: boolean;
+  isLoading?: boolean;
 }
 
 const PhoneticSymbol: React.FC<PhoneticSymbolProps> = ({ 
   symbol, 
   onPlay, 
-  isPlaying 
+  isPlaying,
+  isLoading = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [playingExample, setPlayingExample] = useState<string | null>(null);
+
+  // 播放示例单词
+  const handlePlayExample = async (word: string) => {
+    if (playingExample === word) {
+      phoneticPronunciation.stopAll();
+      setPlayingExample(null);
+      return;
+    }
+
+    setPlayingExample(word);
+    try {
+      await phoneticPronunciation.playExampleWord(word);
+      setPlayingExample(null);
+    } catch (error) {
+      console.error('示例单词播放失败:', error);
+      setPlayingExample(null);
+    }
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -90,7 +112,17 @@ const PhoneticSymbol: React.FC<PhoneticSymbolProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm text-white font-kids"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayExample(example);
+              }}
+              className={`
+                bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm text-white font-kids
+                cursor-pointer transition-all duration-300 hover:bg-opacity-30
+                ${playingExample === example ? 'bg-yellow-400 bg-opacity-80' : ''}
+              `}
             >
               {example}
             </motion.div>
@@ -99,23 +131,34 @@ const PhoneticSymbol: React.FC<PhoneticSymbolProps> = ({
       </div>
 
       {/* 播放按钮 */}
-      <motion.div
-        className="absolute top-4 right-4"
+      <motion.button
+        className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white bg-opacity-20 flex items-center justify-center transition-all duration-300 hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlay(symbol);
+        }}
+        disabled={isPlaying}
       >
         <div className={`
-          w-12 h-12 rounded-full bg-white bg-opacity-20 flex items-center justify-center
+          w-full h-full rounded-full flex items-center justify-center
           transition-all duration-300
-          ${isPlaying ? 'bg-yellow-400 bg-opacity-90' : ''}
+          ${isPlaying ? 'bg-yellow-400 bg-opacity-90' : isLoading ? 'bg-blue-400 bg-opacity-90' : 'bg-white bg-opacity-20'}
         `}>
-          {isPlaying ? (
+          {isLoading ? (
+            <motion.div
+              className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+          ) : isPlaying ? (
             <Pause className="w-6 h-6 text-white" />
           ) : (
             <Play className="w-6 h-6 text-white" />
           )}
         </div>
-      </motion.div>
+      </motion.button>
 
       {/* 悬停效果 */}
       {isHovered && (

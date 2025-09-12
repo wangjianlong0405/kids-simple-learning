@@ -103,11 +103,29 @@ export class MobileAudioHandler {
     }
 
     return new Promise((resolve, reject) => {
+      // 停止当前播放
+      speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = options.lang || 'en-US';
       utterance.rate = options.rate || 0.8;
       utterance.pitch = options.pitch || 1.0;
       utterance.volume = options.volume || 0.8;
+
+      // 尝试选择最佳语音
+      const voices = speechSynthesis.getVoices();
+      let bestVoice = voices.find(voice => 
+        voice.lang.startsWith('en') && 
+        (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+      );
+      
+      if (!bestVoice) {
+        bestVoice = voices.find(voice => voice.lang.startsWith('en'));
+      }
+      
+      if (bestVoice) {
+        utterance.voice = bestVoice;
+      }
 
       utterance.onstart = () => {
         console.log('TTS播放开始');
@@ -123,7 +141,10 @@ export class MobileAudioHandler {
         reject(new Error(`TTS播放失败: ${event.error}`));
       };
 
-      speechSynthesis.speak(utterance);
+      // 延迟一点时间确保语音引擎准备就绪
+      setTimeout(() => {
+        speechSynthesis.speak(utterance);
+      }, 50);
     });
   }
 

@@ -53,7 +53,7 @@ export const phoneticSymbols: PhoneticSymbol[] = [
     sound: 'eɪ',
     examples: ['cake', 'make', 'take', 'lake'],
     category: 'diphthong',
-    description: '长元音 ai，像小飞机的声音',
+    description: '双元音 ai，像小飞机的声音',
     audioUrl: '/audio/phonics/ai.mp3'
   },
   {
@@ -71,7 +71,7 @@ export const phoneticSymbols: PhoneticSymbol[] = [
     sound: 'oʊ',
     examples: ['boat', 'goat', 'coat', 'road'],
     category: 'diphthong',
-    description: '长元音 oa，像小船的声音',
+    description: '双元音 oa，像小船的声音',
     audioUrl: '/audio/phonics/oa.mp3'
   },
 

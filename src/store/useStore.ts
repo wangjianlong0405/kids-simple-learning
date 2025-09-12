@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Word, UserProgress, GameProgress, GameType } from '../types';
+import { wordsData } from '../data/words';
 
 interface AppState {
   // 用户进度
@@ -36,6 +37,7 @@ interface AppState {
   playAudio: (audioUrl: string) => Promise<void>;
   stopAudio: () => void;
   resetProgress: () => void;
+  getNextWord: (currentWordId?: string) => Word | null;
 }
 
 const initialUserProgress: UserProgress = {
@@ -161,6 +163,34 @@ export const useStore = create<AppState>()(
         isPlaying: false,
         currentAudio: null,
       }),
+      
+      getNextWord: (currentWordId?: string) => {
+        const { currentCategory } = get();
+        
+        // 根据当前分类过滤单词
+        const filteredWords = currentCategory === '' || currentCategory === 'all' 
+          ? wordsData 
+          : wordsData.filter(word => word.category === currentCategory);
+        
+        if (filteredWords.length === 0) return null;
+        
+        // 如果没有当前单词ID，返回第一个单词
+        if (!currentWordId) {
+          return filteredWords[0];
+        }
+        
+        // 找到当前单词的索引
+        const currentIndex = filteredWords.findIndex(word => word.id === currentWordId);
+        
+        // 如果找不到当前单词，返回第一个单词
+        if (currentIndex === -1) {
+          return filteredWords[0];
+        }
+        
+        // 返回下一个单词，如果已经是最后一个，则返回第一个（循环）
+        const nextIndex = (currentIndex + 1) % filteredWords.length;
+        return filteredWords[nextIndex];
+      },
     }),
     {
       name: 'kids-english-learning-storage',

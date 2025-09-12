@@ -5,53 +5,103 @@ import PhoneticSymbol from './PhoneticSymbol';
 import { phoneticSymbols, phonicsCategories } from '../../data/phonics';
 import { PhoneticSymbol as PhoneticSymbolType } from '../../types';
 import ErrorToast from '../ErrorToast';
+import AudioInteractionPrompt from '../AudioInteractionPrompt';
+import AudioTestPanel from '../AudioTestPanel';
+import PhoneticTestPanel from './PhoneticTestPanel';
 import { mobileAudioHandler } from '../../utils/mobileAudioHandler';
+import { phoneticPronunciation } from '../../utils/phoneticPronunciation';
 
 const PhonicsLearning: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentSymbol, setCurrentSymbol] = useState<PhoneticSymbolType | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [practiceMode, setPracticeMode] = useState(false);
   const [practiceScore, setPracticeScore] = useState(0);
   const [practiceAttempts, setPracticeAttempts] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [showTestPanel, setShowTestPanel] = useState(false);
 
   const filteredSymbols = selectedCategory === 'all' 
     ? phoneticSymbols 
     : phoneticSymbols.filter(symbol => symbol.category === selectedCategory);
 
   const handlePlaySymbol = async (symbol: PhoneticSymbolType) => {
+    console.log('点击音标:', symbol);
+    
     if (isPlaying && currentSymbol?.id === symbol.id) {
       // 停止播放
+      console.log('停止播放音标');
+      phoneticPronunciation.stopAll();
       setIsPlaying(false);
+      setIsLoading(false);
       setCurrentSymbol(null);
       return;
     }
 
+    // 先停止任何正在播放的内容
+    phoneticPronunciation.stopAll();
+    
     setCurrentSymbol(symbol);
     setIsPlaying(true);
+    setIsLoading(true);
+    setError(null); // 清除之前的错误
 
     try {
+      console.log('开始播放音标:', symbol.sound);
+      
       // 检查移动端音频限制
       if (mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio()) {
         const prompt = mobileAudioHandler.getUserInteractionPrompt();
         setError(prompt);
         setIsPlaying(false);
+        setIsLoading(false);
+        setCurrentSymbol(null);
         return;
       }
 
-      // 使用TTS播放音标发音
-      await mobileAudioHandler.playTTS(symbol.sound, {
-        lang: 'en-US',
-        rate: 0.7,
-        pitch: 1.2,
-        volume: 0.8
-      });
+      // 使用专门的音标发音系统
+      if (phoneticPronunciation.isSupported()) {
+        console.log('使用音标发音系统');
+        await phoneticPronunciation.playPhoneticSymbol(symbol.sound);
+      } else {
+        console.log('降级到普通TTS');
+        // 降级到普通TTS
+        await mobileAudioHandler.playTTS(symbol.sound, {
+          lang: 'en-US',
+          rate: 0.4,  // 稍微提高语速
+          pitch: 1.0,
+          volume: 0.9 // 稍微降低音量
+        });
+      }
+      
+      console.log('音标播放完成');
       setIsPlaying(false);
+      setIsLoading(false);
+      setCurrentSymbol(null);
+      
     } catch (error) {
       console.error('音标播放失败:', error);
       setIsPlaying(false);
-      setError('音标发音播放失败，请检查设备音频设置');
+      setIsLoading(false);
+      setCurrentSymbol(null);
+      
+      // 提供更详细的错误信息
+      if (error instanceof Error) {
+        if (error.message.includes('不支持语音合成')) {
+          setError('您的浏览器不支持语音合成功能，请使用现代浏览器');
+        } else if (error.message.includes('需要用户交互')) {
+          setError('请先点击屏幕任意位置以启用音频播放功能');
+        } else if (error.message.includes('interrupted')) {
+          setError('音标播放被中断，请稍后重试');
+        } else if (error.message.includes('重试失败')) {
+          setError('音标播放重试失败，请检查音频设置');
+        } else {
+          setError(`音标发音播放失败：${error.message}`);
+        }
+      } else {
+        setError('音标发音播放失败，请检查设备音频设置');
+      }
     }
   };
 
@@ -135,6 +185,7 @@ const PhonicsLearning: React.FC = () => {
                   symbol={symbol}
                   onPlay={handlePlaySymbol}
                   isPlaying={isPlaying && currentSymbol?.id === symbol.id}
+                  isLoading={isLoading && currentSymbol?.id === symbol.id}
                 />
               </motion.div>
             ))}
@@ -157,6 +208,22 @@ const PhonicsLearning: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* 音频交互提示 */}
+      <AudioInteractionPrompt />
+      
+       {/* 音频测试面板 */}
+       {showTestPanel && (
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: 20 }}
+           className="space-y-4"
+         >
+           <AudioTestPanel />
+           <PhoneticTestPanel />
+         </motion.div>
+       )}
+      
       {/* 头部信息 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -182,6 +249,19 @@ const PhonicsLearning: React.FC = () => {
             <Target className="w-5 h-5" />
             <span>开始练习</span>
           </motion.button>
+          
+          {/* 开发模式测试按钮 */}
+          {process.env.NODE_ENV === 'development' && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowTestPanel(!showTestPanel)}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 font-kids flex items-center space-x-2"
+            >
+              <Volume2 className="w-5 h-5" />
+              <span>{showTestPanel ? '隐藏测试' : '音频测试'}</span>
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
@@ -245,6 +325,7 @@ const PhonicsLearning: React.FC = () => {
               symbol={symbol}
               onPlay={handlePlaySymbol}
               isPlaying={isPlaying && currentSymbol?.id === symbol.id}
+              isLoading={isLoading && currentSymbol?.id === symbol.id}
             />
           </motion.div>
         ))}

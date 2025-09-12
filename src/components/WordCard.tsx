@@ -8,7 +8,7 @@ import ErrorToast from './ErrorToast';
 import { playSuccessSound, playErrorSound, playClickSound } from '../utils/audioFeedback';
 
 const WordCard: React.FC = () => {
-  const { currentWord, setCurrentWord, playAudio, isPlaying, stopAudio } = useStore();
+  const { currentWord, setCurrentWord, playAudio, isPlaying, stopAudio, getNextWord } = useStore();
   const [showAnswer, setShowAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +54,22 @@ const WordCard: React.FC = () => {
   };
 
   const handleNext = () => {
-    setCurrentWord(null);
-    setShowAnswer(false);
-    setIsCorrect(null);
+    // 获取下一个单词
+    const nextWord = getNextWord(currentWord?.id);
+    
+    if (nextWord) {
+      // 设置下一个单词
+      setCurrentWord(nextWord);
+      // 重置练习状态
+      setShowAnswer(false);
+      setIsCorrect(null);
+      setError(null);
+    } else {
+      // 如果没有下一个单词，回到列表
+      setCurrentWord(null);
+      setShowAnswer(false);
+      setIsCorrect(null);
+    }
   };
 
   const handleBack = () => {
