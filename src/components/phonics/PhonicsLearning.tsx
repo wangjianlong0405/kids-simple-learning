@@ -253,7 +253,7 @@ const PhonicsLearning: React.FC = () => {
           </motion.button>
           
           {/* 开发模式测试按钮 */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
