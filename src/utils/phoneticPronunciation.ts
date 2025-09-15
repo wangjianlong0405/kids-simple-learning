@@ -61,6 +61,39 @@ export class PhoneticPronunciation {
     return pronunciationMap[symbol] || symbol;
   }
 
+  // 获取音标的中文描述
+  private getPhoneticDescription(symbol: string): string {
+    const descriptionMap: { [key: string]: string } = {
+      'æ': '短元音 a，像小猫叫的声音',
+      'e': '短元音 e，像小鹅叫的声音',
+      'ɪ': '短元音 i，像小鸡叫的声音',
+      'ɒ': '短元音 o，像小鸭叫的声音',
+      'ʌ': '短元音 u，像小牛叫的声音',
+      'eɪ': '双元音 ai，像小飞机的声音',
+      'iː': '长元音 ee，像小蜜蜂的声音',
+      'oʊ': '双元音 oa，像小船的声音',
+      'b': '辅音 b，像小鼓的声音',
+      'p': '辅音 p，像小泡泡的声音',
+      't': '辅音 t，像小钟表的声音',
+      'd': '辅音 d，像小鼓的声音',
+      'k': '辅音 k，像小咳嗽的声音',
+      'ɡ': '辅音 g，像小鸽子叫的声音',
+      'f': '辅音 f，像小风吹的声音',
+      'v': '辅音 v，像小蜜蜂飞的声音',
+      's': '辅音 s，像小蛇的声音',
+      'z': '辅音 z，像小蜜蜂的声音',
+      'm': '辅音 m，像小牛叫的声音',
+      'n': '辅音 n，像小鼻子哼的声音',
+      'l': '辅音 l，像小铃铛的声音',
+      'r': '辅音 r，像小狮子吼的声音',
+      'h': '辅音 h，像小哈气的声音',
+      'w': '辅音 w，像小风吹的声音',
+      'j': '辅音 y，像小鸭子叫的声音'
+    };
+
+    return descriptionMap[symbol] || `音标 ${symbol}`;
+  }
+
   // 检查音频文件是否存在
   private async checkAudioFileExists(audioUrl: string): Promise<boolean> {
     try {
@@ -87,10 +120,10 @@ export class PhoneticPronunciation {
             // 继续执行TTS降级
           }
         } else {
-          console.log(`音频文件不存在，降级到TTS: ${audioUrl}`);
+          console.log(`音频文件不存在，直接使用TTS: ${audioUrl}`);
         }
       } catch (error) {
-        console.log(`音频文件检查失败，降级到TTS: ${error}`);
+        console.log(`音频文件检查失败，使用TTS: ${error}`);
       }
     }
 
@@ -103,105 +136,103 @@ export class PhoneticPronunciation {
     console.log(`准备播放音标: ${symbol} -> ${pronunciation}`);
     
     return new Promise((resolve, reject) => {
-      // 先停止所有播放，但给一点延迟
+      // 先停止所有播放
       speechSynthesis.cancel();
       
-      // 等待一小段时间确保停止完成
-      setTimeout(() => {
-        const speakWithVoice = () => {
-          const utterance = new SpeechSynthesisUtterance(pronunciation);
-          
-          // 优化TTS参数
-          utterance.lang = 'en-US';
-          utterance.rate = 0.4;  // 稍微提高语速，减少中断风险
-          utterance.pitch = 1.0; // 正常音调
-          utterance.volume = 0.9; // 稍微降低音量，提高稳定性
+      // 立即开始TTS播放，不等待
+      const speakWithVoice = () => {
+        const utterance = new SpeechSynthesisUtterance(pronunciation);
+        
+        // 优化TTS参数
+        utterance.lang = 'en-US';
+        utterance.rate = 0.5;  // 稍微提高语速
+        utterance.pitch = 1.0; // 正常音调
+        utterance.volume = 0.8; // 稍微降低音量，提高稳定性
 
-          // 尝试使用更准确的语音
-          const voices = speechSynthesis.getVoices();
-          console.log('可用语音列表:', voices.map(v => ({ name: v.name, lang: v.lang })));
-          
-          let englishVoice = voices.find(voice => 
-            voice.lang.startsWith('en') && 
-            (voice.name.includes('Google') || voice.name.includes('Microsoft'))
-          );
-          
-          // 如果没有找到特定语音，选择第一个英语语音
-          if (!englishVoice) {
-            englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+        // 尝试使用更准确的语音
+        const voices = speechSynthesis.getVoices();
+        console.log('可用语音数量:', voices.length);
+        
+        let englishVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && 
+          (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+        );
+        
+        // 如果没有找到特定语音，选择第一个英语语音
+        if (!englishVoice) {
+          englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+        }
+        
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+          console.log('使用语音:', englishVoice.name);
+        } else {
+          console.log('未找到英语语音，使用默认语音');
+        }
+
+        let isResolved = false;
+
+        utterance.onstart = () => {
+          console.log(`开始播放音标: ${symbol} -> ${pronunciation}`);
+        };
+
+        utterance.onend = () => {
+          if (!isResolved) {
+            console.log('音标播放结束');
+            isResolved = true;
+            resolve();
           }
-          
-          if (englishVoice) {
-            utterance.voice = englishVoice;
-            console.log('使用语音:', englishVoice.name);
-          } else {
-            console.log('未找到英语语音，使用默认语音');
-          }
+        };
 
-          let isResolved = false;
-
-          utterance.onstart = () => {
-            console.log(`开始播放音标: ${symbol} -> ${pronunciation}`);
-          };
-
-          utterance.onend = () => {
-            if (!isResolved) {
-              console.log('音标播放结束');
-              isResolved = true;
+        utterance.onerror = (event) => {
+          console.error('音标播放错误:', event);
+          if (!isResolved) {
+            isResolved = true;
+            // 对于interrupted错误，不重试，直接成功
+            if (event.error === 'interrupted') {
+              console.log('播放被中断，视为成功');
               resolve();
-            }
-          };
-
-          utterance.onerror = (event) => {
-            console.error('音标播放错误:', event);
-            if (!isResolved) {
-              isResolved = true;
-              // 对于interrupted错误，尝试重试一次
-              if (event.error === 'interrupted') {
-                console.log('播放被中断，尝试重试...');
-                setTimeout(() => {
-                  try {
-                    speechSynthesis.speak(utterance);
-                  } catch (retryError) {
-                    reject(new Error(`音标播放重试失败: ${retryError}`));
-                  }
-                }, 100);
-              } else {
-                reject(new Error(`音标播放失败: ${event.error}`));
-              }
-            }
-          };
-
-          // 立即播放
-          try {
-            speechSynthesis.speak(utterance);
-          } catch (error) {
-            if (!isResolved) {
-              isResolved = true;
-              reject(new Error(`音标播放启动失败: ${error}`));
+            } else if (event.error === 'not-allowed') {
+              reject(new Error('需要用户交互才能播放音频，请先点击屏幕'));
+            } else if (event.error === 'audio-busy') {
+              reject(new Error('音频设备忙碌，请稍后重试'));
+            } else if (event.error === 'audio-hardware') {
+              reject(new Error('音频硬件错误，请检查设备音频设置'));
+            } else {
+              reject(new Error(`音标播放失败: ${event.error}`));
             }
           }
         };
 
-        // 如果语音列表还没加载完成，等待加载
-        if (speechSynthesis.getVoices().length === 0) {
-          console.log('等待语音列表加载...');
-          speechSynthesis.onvoiceschanged = () => {
-            console.log('语音列表加载完成');
-            speakWithVoice();
-          };
-          
-          // 设置超时，防止无限等待
-          setTimeout(() => {
-            if (speechSynthesis.getVoices().length === 0) {
-              console.log('语音列表加载超时，使用默认设置');
-              speakWithVoice();
-            }
-          }, 1000);
-        } else {
-          speakWithVoice();
+        // 立即播放
+        try {
+          speechSynthesis.speak(utterance);
+        } catch (error) {
+          if (!isResolved) {
+            isResolved = true;
+            reject(new Error(`音标播放启动失败: ${error}`));
+          }
         }
-      }, 100); // 给100ms延迟确保停止完成
+      };
+
+      // 如果语音列表还没加载完成，等待加载
+      if (speechSynthesis.getVoices().length === 0) {
+        console.log('等待语音列表加载...');
+        speechSynthesis.onvoiceschanged = () => {
+          console.log('语音列表加载完成');
+          speakWithVoice();
+        };
+        
+        // 设置超时，防止无限等待
+        setTimeout(() => {
+          if (speechSynthesis.getVoices().length === 0) {
+            console.log('语音列表加载超时，使用默认设置');
+            speakWithVoice();
+          }
+        }, 500); // 减少超时时间
+      } else {
+        speakWithVoice();
+      }
     });
   }
 

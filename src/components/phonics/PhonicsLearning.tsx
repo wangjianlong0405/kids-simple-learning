@@ -50,17 +50,7 @@ const PhonicsLearning: React.FC = () => {
     try {
       console.log('开始播放音标:', symbol.sound);
       
-      // 检查移动端音频限制
-      if (mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio()) {
-        const prompt = mobileAudioHandler.getUserInteractionPrompt();
-        setError(prompt);
-        setIsPlaying(false);
-        setIsLoading(false);
-        setCurrentSymbol(null);
-        return;
-      }
-
-      // 使用专门的音标发音系统
+      // 简化音频播放逻辑，直接使用音标发音系统
       if (phoneticPronunciation.isSupported()) {
         console.log('使用音标发音系统');
         await phoneticPronunciation.playPhoneticSymbol(symbol.sound, symbol.audioUrl);
@@ -69,9 +59,9 @@ const PhonicsLearning: React.FC = () => {
         // 降级到普通TTS
         await mobileAudioHandler.playTTS(symbol.sound, {
           lang: 'en-US',
-          rate: 0.4,  // 稍微提高语速
+          rate: 0.5,  // 稍微提高语速
           pitch: 1.0,
-          volume: 0.9 // 稍微降低音量
+          volume: 0.8 // 稍微降低音量
         });
       }
       
@@ -86,18 +76,18 @@ const PhonicsLearning: React.FC = () => {
       setIsLoading(false);
       setCurrentSymbol(null);
       
-      // 提供更详细的错误信息
+      // 提供更友好的错误信息
       if (error instanceof Error) {
         if (error.message.includes('不支持语音合成')) {
-          setError('您的浏览器不支持语音合成功能，请使用现代浏览器');
+          setError('您的浏览器不支持语音合成功能，请使用现代浏览器（如Chrome、Safari、Firefox）');
         } else if (error.message.includes('需要用户交互')) {
           setError('请先点击屏幕任意位置以启用音频播放功能');
         } else if (error.message.includes('interrupted')) {
           setError('音标播放被中断，请稍后重试');
-        } else if (error.message.includes('重试失败')) {
-          setError('音标播放重试失败，请检查音频设置');
-        } else if (error.message.includes('音频加载失败')) {
-          setError('音频文件加载失败，已自动切换到语音合成播放');
+        } else if (error.message.includes('音频设备忙碌')) {
+          setError('音频设备忙碌，请稍后重试');
+        } else if (error.message.includes('音频硬件错误')) {
+          setError('音频硬件错误，请检查设备音频设置');
         } else {
           setError(`音标发音播放失败：${error.message}`);
         }
@@ -210,8 +200,10 @@ const PhonicsLearning: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 音频交互提示 */}
-      <AudioInteractionPrompt />
+      {/* 音频交互提示 - 只在移动端且未交互时显示 */}
+      {mobileAudioHandler.isMobile() && !mobileAudioHandler.canPlayAudio() && (
+        <AudioInteractionPrompt />
+      )}
       
        {/* 音频测试面板 */}
        {showTestPanel && (
@@ -333,6 +325,37 @@ const PhonicsLearning: React.FC = () => {
         ))}
       </motion.div>
 
+      {/* 音频状态指示器 */}
+      {(isPlaying || isLoading) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 shadow-xl"
+        >
+          <div className="flex items-center justify-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full">
+              {isLoading ? (
+                <motion.div
+                  className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+              ) : (
+                <Volume2 className="w-6 h-6 text-white" />
+              )}
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-800 font-kids">
+                {isLoading ? '正在准备发音...' : '正在播放发音...'}
+              </h3>
+              <p className="text-gray-600 font-kids">
+                {currentSymbol ? `音标: ${currentSymbol.symbol} (${currentSymbol.sound})` : ''}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* 学习提示 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -351,6 +374,7 @@ const PhonicsLearning: React.FC = () => {
           <p>• 注意口型和舌位的变化</p>
           <p>• 多听多练，培养英语语感</p>
           <p>• 使用练习模式进行系统训练</p>
+          <p>• 如果听不到声音，请检查设备音量设置</p>
         </div>
       </motion.div>
 

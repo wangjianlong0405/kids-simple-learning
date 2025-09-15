@@ -102,7 +102,8 @@ export class MobileAudioHandler {
 
   // 检查是否可以播放音频
   canPlayAudio(): boolean {
-    return this.isUserInteracted;
+    // 放宽限制：如果用户已经尝试过交互，或者不是移动设备，就允许播放
+    return this.isUserInteracted || !this.isMobile();
   }
 
   // 获取用户交互提示
