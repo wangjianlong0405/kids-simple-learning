@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Volume2, VolumeX, Sun, Moon, RotateCcw, Check } from 'lucide-react';
+import { Settings, Volume2, VolumeX, Sun, Moon, RotateCcw, Check, Smartphone, TestTube } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 const SettingsPanel: React.FC = () => {
@@ -164,6 +164,34 @@ const SettingsPanel: React.FC = () => {
                     )}
                   </div>
                 ))}
+              </div>
+
+              {/* 音频测试工具 */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="font-bold text-gray-800 font-kids mb-4">音频测试工具</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('showMobileAudioTest'));
+                      setShowSettings(false);
+                    }}
+                    className="flex items-center space-x-3 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold py-3 px-4 rounded-lg transition-all duration-300 font-kids"
+                  >
+                    <Smartphone className="w-5 h-5" />
+                    <span>移动端音频测试</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('showWeChatAudioTest'));
+                      setShowSettings(false);
+                    }}
+                    className="flex items-center space-x-3 bg-green-50 hover:bg-green-100 text-green-800 font-bold py-3 px-4 rounded-lg transition-all duration-300 font-kids"
+                  >
+                    <TestTube className="w-5 h-5" />
+                    <span>微信环境音频测试</span>
+                  </button>
+                </div>
               </div>
 
               {/* 重置进度 */}

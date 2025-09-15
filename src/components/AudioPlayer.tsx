@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX, Play, Pause, AlertCircle, Loader2 } from 'lucide-react';
 import { AudioCompatibilityManager } from '../utils/audioCompatibility';
+import { wechatAudioHandler } from '../utils/wechatAudioHandler';
 
 interface AudioPlayerProps {
   text: string;
@@ -25,11 +26,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [compatibility, setCompatibility] = useState<any>(null);
   const [audioMethod, setAudioMethod] = useState<'speechSynthesis' | 'audioElement' | 'textOnly'>('speechSynthesis');
+  const [isWeChat, setIsWeChat] = useState(false);
 
   useEffect(() => {
     const manager = AudioCompatibilityManager.getInstance();
     setCompatibility(manager);
     setAudioMethod(manager.getBestAudioMethod());
+    
+    // 检查是否在微信环境
+    setIsWeChat(wechatAudioHandler.isWeChatEnvironment());
   }, []);
 
   // 增强的TTS功能
@@ -60,6 +65,28 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       throw new Error('Speech Synthesis not supported');
     }
 
+    // 微信环境使用专门的处理器
+    if (isWeChat) {
+      try {
+        await wechatAudioHandler.playTTS(text, {
+          lang: language === 'en' ? 'en-US' : 'zh-CN',
+          rate: 0.8,
+          pitch: 1.0,
+          volume: 0.8
+        });
+        setIsPlaying(true);
+        setIsLoading(false);
+        setTimeout(() => {
+          setIsPlaying(false);
+          onPlayEnd?.();
+        }, text.length * 100); // 估算播放时间
+        return;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // 非微信环境使用原有逻辑
     const manager = AudioCompatibilityManager.getInstance();
     const params = manager.getPlatformOptimizedParams();
 

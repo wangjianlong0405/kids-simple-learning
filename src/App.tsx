@@ -16,6 +16,9 @@ import AudioCompatibilityDemo from './components/AudioCompatibilityDemo';
 import AudioSystemDashboard from './components/AudioSystemDashboard';
 import MobileAudioTest from './components/MobileAudioTest';
 import MobileAudioInitializer from './components/MobileAudioInitializer';
+import WeChatAudioInitializer from './components/WeChatAudioInitializer';
+import WeChatAudioTest from './components/WeChatAudioTest';
+import { wechatOptimizer } from './utils/wechatOptimizer';
 import { useStore } from './store/useStore';
 
 function App() {
@@ -25,18 +28,25 @@ function App() {
   const [showAudioDemo, setShowAudioDemo] = useState(false);
   const [showAudioDashboard, setShowAudioDashboard] = useState(false);
   const [showMobileAudioTest, setShowMobileAudioTest] = useState(false);
+  const [showWeChatAudioTest, setShowWeChatAudioTest] = useState(false);
 
   useEffect(() => {
+    // 应用微信环境优化
+    wechatOptimizer.applyWeChatOptimizations();
+    
     const handleShowAudioDemo = () => setShowAudioDemo(true);
     const handleShowAudioDashboard = () => setShowAudioDashboard(true);
     const handleShowMobileAudioTest = () => setShowMobileAudioTest(true);
+    const handleShowWeChatAudioTest = () => setShowWeChatAudioTest(true);
     window.addEventListener('showAudioDemo', handleShowAudioDemo);
     window.addEventListener('showAudioDashboard', handleShowAudioDashboard);
     window.addEventListener('showMobileAudioTest', handleShowMobileAudioTest);
+    window.addEventListener('showWeChatAudioTest', handleShowWeChatAudioTest);
     return () => {
       window.removeEventListener('showAudioDemo', handleShowAudioDemo);
       window.removeEventListener('showAudioDashboard', handleShowAudioDashboard);
       window.removeEventListener('showMobileAudioTest', handleShowMobileAudioTest);
+      window.removeEventListener('showWeChatAudioTest', handleShowWeChatAudioTest);
     };
   }, []);
 
@@ -99,6 +109,9 @@ function App() {
         {/* 移动端音频初始化器 */}
         <MobileAudioInitializer />
         
+        {/* 微信环境音频初始化器 */}
+        <WeChatAudioInitializer />
+        
         {/* 键盘快捷键 */}
         <KeyboardShortcuts onShowHelp={() => setShowHelp(true)} />
         
@@ -156,6 +169,24 @@ function App() {
                 </button>
               </div>
               <MobileAudioTest />
+            </div>
+          </div>
+        )}
+        
+        {/* 微信环境音频测试 */}
+        {showWeChatAudioTest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">📱 微信环境音频测试</h2>
+                <button
+                  onClick={() => setShowWeChatAudioTest(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <WeChatAudioTest />
             </div>
           </div>
         )}
